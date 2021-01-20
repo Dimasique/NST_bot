@@ -13,40 +13,35 @@ from aiohttp import ClientSession
 
 logging.basicConfig(level=logging.INFO)
 
-BOT_TOKEN = os.environ['BOT_TOKEN']
+BOT_TOKEN = '1512424491:AAGdEuGa_LMUwuijAA4IV6y7_DQztPoOmeE'
 
-WEBHOOK_HOST = os.environ['WEBHOOK_HOST_ADDR']
+WEBHOOK_HOST = 'https://nstbot.herokuapp.com'
 WEBHOOK_PATH = f'/webhook/{BOT_TOKEN}'
 WEBHOOK_URL = urljoin(WEBHOOK_HOST, WEBHOOK_PATH)
 
-WEBAPP_HOST = '0.0.0.0'
-WEBAPP_PORT = os.environ['PORT']
+WEBAPP_HOST = 'localhost'
+WEBAPP_PORT = 3001
 
-bot = Bot(token=BOT_TOKEN)
-session = ClientSession()
+loop = asyncio.get_event_loop()
+bot = Bot(token=BOT_TOKEN, loop=loop)
 dp = Dispatcher(bot)
-dp.setup_middleware(LoggingMiddleware())
 
 
 @dp.message_handler()
 async def echo(message: types.Message):
-
-    return SendMessage(message.chat.id, message.text)
-
-
-async def on_startup(dispatcher: 'Dispatcher') -> None:
-    logging.warning('Starting...')
+    await bot.send_message(message.chat.id, message.text)
 
 
-async def on_shutdown(dispatcher: 'Dispatcher') -> None:
-    logging.warning('Bye!')
+async def on_startup(dp):
+    await bot.set_webhook(WEBHOOK_URL)
+    # insert code here to run it after start
+
+
+async def on_shutdown(dp):
+    # insert code here to run it before shutdown
+    pass
 
 
 if __name__ == '__main__':
-    start_webhook(dispatcher=dp,
-                  webhook_path=WEBHOOK_PATH,
-                  on_startup=on_startup,
-                  on_shutdown=on_shutdown,
-                  skip_updates=False,
-                  host=WEBAPP_HOST,
-                  port=WEBAPP_PORT)
+    start_webhook(dispatcher=dp, webhook_path=WEBHOOK_PATH, on_startup=on_startup, on_shutdown=on_shutdown,
+                  skip_updates=False, host=WEBAPP_HOST, port=WEBAPP_PORT)
