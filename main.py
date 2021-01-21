@@ -13,9 +13,9 @@ from aiohttp import ClientSession
 
 logging.basicConfig(level=logging.INFO)
 
-BOT_TOKEN = '1512424491:AAGdEuGa_LMUwuijAA4IV6y7_DQztPoOmeE'
+BOT_TOKEN = os.environ.get('TOKEN') #'1512424491:AAGdEuGa_LMUwuijAA4IV6y7_DQztPoOmeE'
 
-WEBHOOK_HOST = 'https://glacial-beyond-67935.herokuapp.com/'
+WEBHOOK_HOST = os.environ.get('WEBHOOK_HOST') #'https://glacial-beyond-67935.herokuapp.com/'
 WEBHOOK_PATH = f'/{BOT_TOKEN}'
 WEBHOOK_URL = urljoin(WEBHOOK_HOST, WEBHOOK_PATH)
 
