@@ -32,8 +32,8 @@ dp = Dispatcher(bot)
 async def hello(message: types.Message):
     await bot.send_message(message.chat.id, HELLO)
 
-@dp.message_handler()
-async def help(commands=['help']):
+@dp.message_handler(commands=['help'])
+async def help(message: types.Message):
     await bot.send_message(message.chat.id, HELP)
 
 async def on_startup(dp):
