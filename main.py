@@ -7,6 +7,11 @@ from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from aiogram.dispatcher import Dispatcher
 from aiogram.dispatcher.webhook import SendMessage
 from aiogram.utils.executor import start_webhook
+
+from aiogram.types import ReplyKeyboardRemove, \
+    ReplyKeyboardMarkup, KeyboardButton, \
+    InlineKeyboardMarkup, InlineKeyboardButton
+
 from urllib.parse import urljoin
 
 from aiohttp import ClientSession
@@ -26,6 +31,16 @@ WEBAPP_PORT = os.environ.get('PORT')
 loop = asyncio.get_event_loop()
 bot = Bot(token=BOT_TOKEN, loop=loop)
 dp = Dispatcher(bot)
+
+button_nst = KeyboardButton(r'\nst')
+button_gan = KeyboardButton(r'\gan')
+button_help = KeyboardButton(r'\help')
+
+greet_kb = ReplyKeyboardMarkup()
+
+greet_kb.add(button_nst)
+greet_kb.add(button_gan)
+greet_kb.add(button_help)
 
 
 @dp.message_handler(commands=['start'])
