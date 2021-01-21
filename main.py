@@ -4,7 +4,7 @@ import os
 
 from aiogram import Bot, types, executor, types
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
-from aiogram.dispatcher import Dispatcher
+from aiogram.dispatcher import Dispatcher, FSMContext
 from aiogram.dispatcher.webhook import SendMessage
 from aiogram.utils.executor import start_webhook
 
@@ -16,6 +16,7 @@ from urllib.parse import urljoin
 
 from aiohttp import ClientSession
 from answers import *
+from states import *
 
 logging.basicConfig(level=logging.INFO)
 
@@ -45,15 +46,31 @@ kb.add(button_help)
 kb.add(button_cancel)
 
 
-@dp.message_handler(commands=['start'])
-async def hello(message: types.Message):
+@dp.message_handler(commands=['start'], state="*")
+async def hello(message: types.Message, state: FSMContext):
+    state.finish()
     await bot.send_message(message.chat.id, HELLO, reply_markup=kb)
 
-@dp.message_handler(commands=['help'])
-async def help(message: types.Message):
+@dp.message_handler(commands=['help'], state="*")
+async def help(message: types.Message, state: FSMContext):
+    state.finish()
     await bot.send_message(message.chat.id, HELP, reply_markup=kb)
 
-@dp.message_handler(commands=['cancel', 'nst', 'gan'])
+
+@dp.message_handler(commands=['nst'], state="*")
+async def choose_nst(message: types.Message, state: FSMContext):
+    await NST_states.waiting_for_images.set()
+    await bot.send_message(message.chat.id, NST_CHOOSE)
+
+@dp.message_handler(state=NST_states.waiting_for_images, content_types=['photo'])
+async def choose_nst(message: types.Message, state: FSMContext):
+
+    res = 'Получил!' if message.photo[-1] is not None else 'Что-то не так :('
+    state.finish()
+    await bot.send_message(message.chat.id, res, reply_markup=kb)
+
+
+@dp.message_handler(commands=['cancel',  'gan'])
 async def help(message: types.Message):
     await bot.send_message(message.chat.id, DUMMY, reply_markup=kb)
 
