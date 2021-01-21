@@ -8,6 +8,8 @@ from aiogram.dispatcher import Dispatcher, FSMContext
 from aiogram.dispatcher.webhook import SendMessage
 from aiogram.utils.executor import start_webhook
 
+from aiogram.types.message import ContentType
+
 from aiogram.types import ReplyKeyboardRemove, \
     ReplyKeyboardMarkup, KeyboardButton, \
     InlineKeyboardMarkup, InlineKeyboardButton
@@ -62,7 +64,7 @@ async def choose_nst(message: types.Message, state: FSMContext):
     await NST_states.waiting_for_images.set()
     await bot.send_message(message.chat.id, NST_CHOOSE, reply_markup=None)
 
-@dp.message_handler(state=NST_states.waiting_for_images, content_types=['photo'])
+@dp.message_handler(state=NST_states.waiting_for_images, content_types=ContentType.PHOTO)
 async def choose_nst(message: types.Message, state: FSMContext):
 
     res = 'Получил!' if message.photo[-1] is not None else 'Что-то не так :('
