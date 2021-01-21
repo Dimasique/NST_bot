@@ -29,9 +29,12 @@ dp = Dispatcher(bot)
 
 
 @dp.message_handler(commands=['start'])
-async def echo(message: types.Message):
+async def hello(message: types.Message):
     await bot.send_message(message.chat.id, HELLO)
 
+@dp.message_handler()
+async def help(commands=['help']):
+    await bot.send_message(message.chat.id, HELP)
 
 async def on_startup(dp):
     await bot.delete_webhook()
