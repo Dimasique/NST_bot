@@ -36,20 +36,20 @@ button_nst = KeyboardButton(r'\nst')
 button_gan = KeyboardButton(r'\gan')
 button_help = KeyboardButton(r'\help')
 
-greet_kb = ReplyKeyboardMarkup()
+kb = ReplyKeyboardMarkup()
 
-greet_kb.add(button_nst)
-greet_kb.add(button_gan)
-greet_kb.add(button_help)
+kb.add(button_nst)
+kb.add(button_gan)
+kb.add(button_help)
 
 
 @dp.message_handler(commands=['start'])
 async def hello(message: types.Message):
-    await bot.send_message(message.chat.id, HELLO)
+    await bot.send_message(message.chat.id, HELLO, reply_markup=kb)
 
 @dp.message_handler(commands=['help'])
 async def help(message: types.Message):
-    await bot.send_message(message.chat.id, HELP)
+    await bot.send_message(message.chat.id, HELP, reply_markup=kb)
 
 async def on_startup(dp):
     await bot.delete_webhook()
