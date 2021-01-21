@@ -63,6 +63,7 @@ async def help(message: types.Message, state: FSMContext):
 async def choose_nst(message: types.Message, state: FSMContext):
     await state.set_state(NST_states.waiting_for_images)
 
+    await bot.send_message(message.chat.id, 'Состояние=' + await state.get_state())
     await bot.send_message(message.chat.id, NST_CHOOSE, reply_markup=None)
 
 @dp.message_handler(state=NST_states.waiting_for_images, commands=['so'])
