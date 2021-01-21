@@ -10,6 +10,7 @@ from aiogram.utils.executor import start_webhook
 from urllib.parse import urljoin
 
 from aiohttp import ClientSession
+from answers import *
 
 logging.basicConfig(level=logging.INFO)
 
@@ -27,9 +28,9 @@ bot = Bot(token=BOT_TOKEN, loop=loop)
 dp = Dispatcher(bot)
 
 
-@dp.message_handler()
+@dp.message_handler(commands=['start'])
 async def echo(message: types.Message):
-    await bot.send_message(message.chat.id, message.text)
+    await bot.send_message(message.chat.id, HELLO)
 
 
 async def on_startup(dp):
