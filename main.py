@@ -32,15 +32,17 @@ loop = asyncio.get_event_loop()
 bot = Bot(token=BOT_TOKEN, loop=loop)
 dp = Dispatcher(bot)
 
-button_nst = KeyboardButton(r'\nst')
-button_gan = KeyboardButton(r'\gan')
-button_help = KeyboardButton(r'\help')
+button_nst = KeyboardButton(r'/nst')
+button_gan = KeyboardButton(r'/gan')
+button_help = KeyboardButton(r'/help')
+button_cancel = KeyboardButton('/cancel')
 
 kb = ReplyKeyboardMarkup()
 
 kb.add(button_nst)
 kb.add(button_gan)
 kb.add(button_help)
+kb.add(button_cancel)
 
 
 @dp.message_handler(commands=['start'])
@@ -50,6 +52,16 @@ async def hello(message: types.Message):
 @dp.message_handler(commands=['help'])
 async def help(message: types.Message):
     await bot.send_message(message.chat.id, HELP, reply_markup=kb)
+
+@dp.message_handler(commands=['cancel', 'nst', 'gan'])
+async def help(message: types.Message):
+    await bot.send_message(message.chat.id, DUMMY, reply_markup=kb)
+
+@dp.message_handler()
+async def help(message: types.Message):
+    await bot.send_message(message.chat.id, WRONG_COMMAND, reply_markup=kb)
+
+
 
 async def on_startup(dp):
     await bot.delete_webhook()
