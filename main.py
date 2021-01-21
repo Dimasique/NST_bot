@@ -20,7 +20,7 @@ WEBHOOK_PATH = f'/{BOT_TOKEN}'
 WEBHOOK_URL = urljoin(WEBHOOK_HOST, WEBHOOK_PATH)
 
 WEBAPP_HOST = '0.0.0.0'
-WEBAPP_PORT = 5000
+WEBAPP_PORT = os.environ.get('PORT')
 
 loop = asyncio.get_event_loop()
 bot = Bot(token=BOT_TOKEN, loop=loop)
