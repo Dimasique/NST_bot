@@ -49,13 +49,11 @@ kb.add(button_cancel)
 
 
 @dp.message_handler(commands=['start'], state="*")
-async def hello(message: types.Message, state: FSMContext):
-    await state.finish()
+async def hello(message: types.Message):
     await bot.send_message(message.chat.id, HELLO, reply_markup=kb)
 
 @dp.message_handler(commands=['help'], state="*")
-async def help(message: types.Message, state: FSMContext):
-    await state.finish()
+async def help(message: types.Message):
     await bot.send_message(message.chat.id, HELP, reply_markup=kb)
 
 
@@ -63,21 +61,22 @@ async def help(message: types.Message, state: FSMContext):
 async def choose_nst(message: types.Message):
     state = dp.current_state(user=message.from_user.id)
 
-    await state.set_state(States.CHOOSE_NST)
+    await state.set_state(TestStates.choose_nst)
 
     #await bot.send_message(message.chat.id, 'Состояние=' + await state.get_state())
     await bot.send_message(message.chat.id, NST_CHOOSE, reply_markup=None)
 
-@dp.message_handler(state=States.CHOOSE_NST, commands=['so'])
-async def choose_nst(message: types.Message, state: FSMContext):
+@dp.message_handler(state=TestStates.choose_nst, commands=['so'])
+async def choose_nst(message: types.Message):
 
+    state = dp.current_state(user=message.from_user.id)
     res = 'Получил!' if message.photo[-1] is not None else 'Что-то не так :('
     await state.finish()
     await bot.send_message(message.chat.id, res, reply_markup=kb)
 
 
-@dp.message_handler(state=States.CHOOSE_NST)
-async def choose_nst(message: types.Message, state: FSMContext):
+@dp.message_handler(state=TestStates.choose_nst)
+async def choose_nst(message: types.Message):
 
     await bot.send_message(message.chat.id, 'гавно', reply_markup=kb)
 

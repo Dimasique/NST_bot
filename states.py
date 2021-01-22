@@ -1,7 +1,6 @@
-from aiogram.utils.helper import Helper, HelperMode, ListItem
+from aiogram.dispatcher.filters.state import State, StatesGroup
 
 
-class States(Helper):
-    mode = HelperMode.snake_case
-
-    CHOOSE_NST = ListItem()
+class TestStates(StatesGroup):
+    choose_nst = State()
+    loading_img = State()
