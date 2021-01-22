@@ -24,9 +24,9 @@ from keyboards import *
 
 logging.basicConfig(level=logging.INFO)
 
-BOT_TOKEN = os.environ.get('TOKEN')  # '1512424491:AAGdEuGa_LMUwuijAA4IV6y7_DQztPoOmeE'
+BOT_TOKEN = os.environ.get('TOKEN')
 
-WEBHOOK_HOST = os.environ.get('WEBHOOK_HOST')  # 'https://glacial-beyond-67935.herokuapp.com/'
+WEBHOOK_HOST = os.environ.get('WEBHOOK_HOST')
 WEBHOOK_PATH = f'/{BOT_TOKEN}'
 WEBHOOK_URL = urljoin(WEBHOOK_HOST, WEBHOOK_PATH)
 
@@ -37,9 +37,9 @@ loop = asyncio.get_event_loop()
 bot = Bot(token=BOT_TOKEN, loop=loop)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
-button_nst = KeyboardButton(r'/nst')
-button_gan = KeyboardButton(r'/gan')
-button_help = KeyboardButton(r'/help')
+button_nst = KeyboardButton('/nst')
+button_gan = KeyboardButton('/gan')
+button_help = KeyboardButton('/help')
 button_cancel = KeyboardButton('/cancel')
 
 kb = ReplyKeyboardMarkup()
