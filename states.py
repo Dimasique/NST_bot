@@ -1,6 +1,7 @@
-from aiogram.dispatcher.filters.state import State, StatesGroup
+from aiogram.utils.helper import Helper, HelperMode, ListItem
 
 
-class NST_states(StatesGroup):
+class States(Helper):
+    mode = HelperMode.snake_case
 
-    waiting_for_images = State()
+    CHOOSE_NST = ListItem()

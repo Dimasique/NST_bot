@@ -60,13 +60,15 @@ async def help(message: types.Message, state: FSMContext):
 
 
 @dp.message_handler(commands=['nst'], state="*")
-async def choose_nst(message: types.Message, state: FSMContext):
-    await state.set_state(NST_states.waiting_for_images)
+async def choose_nst(message: types.Message):
+    state = dp.current_state(user=message.from_user.id)
+
+    await state.set_state(States.CHOOSE_NST)
 
     #await bot.send_message(message.chat.id, 'Состояние=' + await state.get_state())
     await bot.send_message(message.chat.id, NST_CHOOSE, reply_markup=None)
 
-@dp.message_handler(state=NST_states.waiting_for_images, commands=['so'])
+@dp.message_handler(state=States.CHOOSE_NST, commands=['so'])
 async def choose_nst(message: types.Message, state: FSMContext):
 
     res = 'Получил!' if message.photo[-1] is not None else 'Что-то не так :('
