@@ -68,9 +68,7 @@ async def choose_nst(message: types.Message):
 
 @dp.message_handler(state=TestStates.choose_nst)
 async def choose_nst(message: types.Message):
-    state = dp.current_state(user=message.from_user.id)
     res = 'Получил!' if message.photo is not None else 'Что-то не так :('
-    await state.finish()
     await bot.send_message(message.chat.id, res, reply_markup=kb)
 
 
