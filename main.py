@@ -74,14 +74,14 @@ async def choose_nst(message: types.Message):
 
 @dp.callback_query_handler(text_contains='btn_style')
 async def process_callback_button1(call: types.CallbackQuery):
-    await call.answer(cache_time=60)
-    await call.message.answer('Жду стиль!')
+    await bot.answer_callback_query(call.id)
+    await bot.send_message(call.from_user.id, 'Жду стиль!')
 
 
 @dp.callback_query_handler(text_contains='btn_content')
 async def process_callback_button2(call: types.CallbackQuery):
-    await call.answer(cache_time=60)
-    await call.message.answer('Жду контент!')
+    await bot.answer_callback_query(call.id)
+    await bot.send_message(call.from_user.id, 'Жду контент!')
 
 
 @dp.message_handler(state=TestStates.choose_nst)
