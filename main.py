@@ -74,11 +74,11 @@ async def choose_nst(message: types.Message):
 
 
 
-@dp.callback_query_handler(func=lambda c: c.data == 'btn_style')
+@dp.callback_query_handler(lambda c: c.data == 'btn_style')
 async def process_callback_button1(callback_query: types.CallbackQuery):
     await bot.send_message(callback_query.from_user.id, 'Жду от тебя фотографию со стилем!')
 
-@dp.callback_query_handler(func=lambda c: c.data == 'btn_content')
+@dp.callback_query_handler(lambda c: c.data == 'btn_content')
 async def process_callback_button1(callback_query: types.CallbackQuery):
     await bot.send_message(callback_query.from_user.id, 'Жду от тебя фотографию со стилем!')
 
