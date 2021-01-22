@@ -59,7 +59,7 @@ async def help(message: types.Message):
     await bot.send_message(message.chat.id, HELP, reply_markup=kb)
 
 
-#__________________________NST_________________________________________#
+# __________________________NST_________________________________________#
 
 @dp.message_handler(commands=['nst'], state="*")
 async def choose_nst(message: types.Message):
@@ -69,17 +69,16 @@ async def choose_nst(message: types.Message):
     inline_kb.add(InlineKeyboardButton(LOAD_STYLE, callback_data='btn_style'))
     inline_kb.add(InlineKeyboardButton(LOAD_CONTENT, callback_data='btn_content'))
 
-
     await bot.send_message(message.chat.id, NST_CHOOSE, reply_markup=inline_kb)
 
 
-
-@dp.callback_query_handler(text='btn_style')
+@dp.callback_query_handler(text_contains='btn_style')
 async def process_callback_button1(call: types.CallbackQuery):
     await call.answer(cache_time=60)
     await call.message.answer('Жду стиль!')
 
-@dp.callback_query_handler(text='btn_content')
+
+@dp.callback_query_handler(text_contains='btn_content')
 async def process_callback_button2(call: types.CallbackQuery):
     await call.answer(cache_time=60)
     await call.message.answer('Жду контент!')
@@ -90,8 +89,6 @@ async def choose_nst_(message: types.Message, state: FSMContext):
     res = 'Получил!' if message.photo is not None else 'Что-то не так :('
     await bot.send_message(message.chat.id, res, reply_markup=kb)
     await state.finish()
-
-
 
 
 #############################################################################
