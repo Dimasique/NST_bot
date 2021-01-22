@@ -66,7 +66,7 @@ async def choose_nst(message: types.Message):
     #await bot.send_message(message.chat.id, 'Состояние=' + await state.get_state())
     await bot.send_message(message.chat.id, NST_CHOOSE, reply_markup=None)
 
-@dp.message_handler(state=TestStates.choose_nst, commands=['so'])
+@dp.message_handler(commands=['so'])
 async def choose_nst(message: types.Message):
 
     state = dp.current_state(user=message.from_user.id)
@@ -76,7 +76,7 @@ async def choose_nst(message: types.Message):
 
 
 @dp.message_handler(state=TestStates.choose_nst)
-async def choose_nst(message: types.Message):
+async def choose_nst_(message: types.Message):
 
     await bot.send_message(message.chat.id, 'гавно', reply_markup=kb)
 
@@ -86,7 +86,7 @@ async def help(message: types.Message):
     await bot.send_message(message.chat.id, DUMMY, reply_markup=kb)
 
 @dp.message_handler()
-async def help(message: types.Message):
+async def wrong(message: types.Message):
     await bot.send_message(message.chat.id, WRONG_COMMAND, reply_markup=kb)
 
 
