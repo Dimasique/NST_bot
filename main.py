@@ -7,6 +7,7 @@ from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from aiogram.dispatcher import Dispatcher, FSMContext
 from aiogram.dispatcher.webhook import SendMessage
 from aiogram.utils.executor import start_webhook
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
 from aiogram.types.message import ContentType
 
@@ -33,7 +34,7 @@ WEBAPP_PORT = os.environ.get('PORT')
 
 loop = asyncio.get_event_loop()
 bot = Bot(token=BOT_TOKEN, loop=loop)
-dp = Dispatcher(bot)
+dp = Dispatcher(bot, storage=MemoryStorage())
 
 button_nst = KeyboardButton(r'/nst')
 button_gan = KeyboardButton(r'/gan')
@@ -62,14 +63,14 @@ async def help(message: types.Message):
 async def choose_nst(message: types.Message):
     await TestStates.choose_nst.set()
 
-    # await bot.send_message(message.chat.id, 'Состояние=' + await state.get_state())
     await bot.send_message(message.chat.id, NST_CHOOSE, reply_markup=None)
 
 
 @dp.message_handler(state=TestStates.choose_nst)
-async def choose_nst_(message: types.Message):
+async def choose_nst_(message: types.Message, state: FSMContext):
     res = 'Получил!' if message.photo is not None else 'Что-то не так :('
     await bot.send_message(message.chat.id, res, reply_markup=kb)
+    await state.finish()
 
 
 @dp.message_handler(commands=['cancel', 'gan'])
