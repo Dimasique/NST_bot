@@ -20,6 +20,8 @@ from urllib.parse import urljoin
 from answers import *
 from states import *
 
+from keyboards import *
+
 logging.basicConfig(level=logging.INFO)
 
 BOT_TOKEN = os.environ.get('TOKEN')  # '1512424491:AAGdEuGa_LMUwuijAA4IV6y7_DQztPoOmeE'
@@ -63,15 +65,7 @@ async def help(message: types.Message):
 @dp.message_handler(commands=['nst'], state="*")
 async def choose_nst(message: types.Message):
     await TestStates.choose_nst.set()
-
-    inline_kb = InlineKeyboardMarkup(row_width=2)
-
-    btn_style = InlineKeyboardButton(LOAD_STYLE, callback_data='btn_style')
-    btn_content = InlineKeyboardButton(LOAD_CONTENT, callback_data='btn_content')
-
-    inline_kb.add(btn_style)
-    inline_kb.add(btn_content)
-    await bot.send_message(message.chat.id, NST_CHOOSE, reply_markup=inline_kb)
+    await bot.send_message(message.chat.id, NST_CHOOSE, reply_markup=inline_kb_nst)
 
 
 @dp.callback_query_handler(text_contains='btn_style')
