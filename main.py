@@ -66,23 +66,21 @@ async def choose_nst(message: types.Message):
     await TestStates.choose_nst.set()
 
     inline_kb = InlineKeyboardMarkup(row_width=2)
-    inline_kb.add(InlineKeyboardButton('Загрузить картинку со стилем', callback_data='btn_style'))
-    inline_kb.add(InlineKeyboardButton('Загрузить картинку со контентом', callback_data='btn_content'))
+    inline_kb.add(InlineKeyboardButton(LOAD_STYLE, callback_data='btn_style'))
+    inline_kb.add(InlineKeyboardButton(LOAD_CONTENT, callback_data='btn_content'))
 
 
     await bot.send_message(message.chat.id, NST_CHOOSE, reply_markup=inline_kb)
 
 
 
-@dp.callback_query_handler(lambda c: c.data == 'btn_style')
-async def process_callback_button1(callback_query: types.CallbackQuery):
-    await bot.answer_callback_query(
-            callback_query.id, 'Жду стиль!')
+@dp.callback_query_handler(text=LOAD_STYLE)
+async def process_callback_button1(call: types.CallbackQuery):
+    await call.message.answer('Жду стиль!')
 
-@dp.callback_query_handler(lambda c: c.data == 'btn_content')
-async def process_callback_button1(callback_query: types.CallbackQuery):
-    await bot.answer_callback_query(
-        callback_query.id, 'Жду контент!')
+@dp.callback_query_handler(text=LOAD_CONTENT)
+async def process_callback_button1(call: types.CallbackQuery):
+    await call.message.answer('Жду контент!')
 
 
 @dp.message_handler(state=TestStates.choose_nst)
