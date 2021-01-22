@@ -76,7 +76,7 @@ async def choose_nst(message: types.Message, state: FSMContext):
     await bot.send_message(message.chat.id, res, reply_markup=kb)
 
 
-@dp.message_handler(state=NST_states.waiting_for_images)
+@dp.message_handler(state=States.CHOOSE_NST)
 async def choose_nst(message: types.Message, state: FSMContext):
 
     await bot.send_message(message.chat.id, 'гавно', reply_markup=kb)
