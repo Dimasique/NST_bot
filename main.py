@@ -59,11 +59,28 @@ async def help(message: types.Message):
     await bot.send_message(message.chat.id, HELP, reply_markup=kb)
 
 
+#__________________________NST_________________________________________#
+
 @dp.message_handler(commands=['nst'], state="*")
 async def choose_nst(message: types.Message):
     await TestStates.choose_nst.set()
 
-    await bot.send_message(message.chat.id, NST_CHOOSE, reply_markup=None)
+    inline_kb = InlineKeyboardMarkup(row_width=2)
+    inline_kb.add(InlineKeyboardButton('Загрузить картинку со стилем', callback_data='btn_style'))
+    inline_kb.add(InlineKeyboardButton('Загрузить картинку со контентом', callback_data='btn_content'))
+
+
+    await bot.send_message(message.chat.id, NST_CHOOSE, reply_markup=inline_kb)
+
+
+
+@dp.callback_query_handler(func=lambda c: c.data == 'btn_style')
+async def process_callback_button1(callback_query: types.CallbackQuery):
+    await bot.send_message(callback_query.from_user.id, 'Жду от тебя фотографию со стилем!')
+
+@dp.callback_query_handler(func=lambda c: c.data == 'btn_content')
+async def process_callback_button1(callback_query: types.CallbackQuery):
+    await bot.send_message(callback_query.from_user.id, 'Жду от тебя фотографию со стилем!')
 
 
 @dp.message_handler(state=TestStates.choose_nst)
@@ -73,8 +90,12 @@ async def choose_nst_(message: types.Message, state: FSMContext):
     await state.finish()
 
 
+
+
+#############################################################################
+
 @dp.message_handler(commands=['cancel', 'gan'])
-async def help(message: types.Message):
+async def dummy(message: types.Message):
     await bot.send_message(message.chat.id, DUMMY, reply_markup=kb)
 
 
