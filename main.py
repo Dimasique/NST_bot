@@ -67,7 +67,7 @@ async def choose_nst(message: types.Message):
 
 
 @dp.message_handler(state=TestStates.choose_nst)
-async def choose_nst(message: types.Message):
+async def choose_nst_(message: types.Message):
     res = 'Получил!' if message.photo is not None else 'Что-то не так :('
     await bot.send_message(message.chat.id, res, reply_markup=kb)
 
@@ -78,7 +78,9 @@ async def help(message: types.Message):
 
 
 @dp.message_handler()
-async def wrong(message: types.Message):
+async def wrong(message: types.Message, state: FSMContext):
+
+    await bot.send_message(message.chat.id, state)
     await bot.send_message(message.chat.id, WRONG_COMMAND, reply_markup=kb)
 
 
