@@ -69,7 +69,7 @@ async def choose_nst(message: types.Message):
 
 
 @dp.message_handler(state=TestStates.waiting_for_image_content)
-async def choose_nst_(message: types.Message, state: FSMContext):
+async def choose_nst_(message, state: FSMContext):
 
     if len(message.photo) > 0:
         await TestStates.waiting_for_style_nst.set()
