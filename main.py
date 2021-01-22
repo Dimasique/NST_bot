@@ -17,7 +17,6 @@ from aiogram.types import ReplyKeyboardRemove, \
 
 from urllib.parse import urljoin
 
-from aiohttp import ClientSession
 from answers import *
 from states import *
 
@@ -66,9 +65,12 @@ async def choose_nst(message: types.Message):
     await TestStates.choose_nst.set()
 
     inline_kb = InlineKeyboardMarkup(row_width=2)
-    inline_kb.add(InlineKeyboardButton(LOAD_STYLE, callback_data='btn_style'))
-    inline_kb.add(InlineKeyboardButton(LOAD_CONTENT, callback_data='btn_content'))
 
+    btn_style = InlineKeyboardButton(LOAD_STYLE, callback_data='btn_style')
+    btn_content = InlineKeyboardButton(LOAD_CONTENT, callback_data='btn_content')
+
+    inline_kb.add(btn_style)
+    inline_kb.add(btn_content)
     await bot.send_message(message.chat.id, NST_CHOOSE, reply_markup=inline_kb)
 
 
