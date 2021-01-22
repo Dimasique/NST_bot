@@ -64,39 +64,22 @@ async def help(message: types.Message):
 
 @dp.message_handler(commands=['nst'], state="*")
 async def choose_nst(message: types.Message):
-    await TestStates.choose_nst.set()
-    await bot.send_message(message.chat.id, NST_CHOOSE, reply_markup=inline_kb_nst)
+    await TestStates.waiting_for_image_content.set()
+    await bot.send_message(message.chat.id, NST_CHOOSE, reply_markup=empty_kb)
 
 
-@dp.callback_query_handler(text_contains='btn_style')
-async def process_callback_button1(call: types.CallbackQuery):
-    await bot.answer_callback_query(call.id)
-    await bot.send_message(call.from_user.id, 'Жду стиль!')
-
-
-@dp.callback_query_handler(text_contains='btn_content')
-async def process_callback_button2(call: types.CallbackQuery):
-    await bot.answer_callback_query(call.id)
-    await bot.send_message(call.from_user.id, 'Жду контент!')
-
-
-@dp.message_handler(state=TestStates.choose_nst)
+@dp.message_handler(state=TestStates.waiting_for_image_content)
 async def choose_nst_(message: types.Message, state: FSMContext):
-    res = 'Получил!' if message.photo is not None else 'Что-то не так :('
-    await bot.send_message(message.chat.id, res, reply_markup=kb)
-    await state.finish()
+
+    if len(message.photo) > 0:
+        await TestStates.waiting_for_style_nst.set()
+        await bot.send_message(message.chat.id, WAIT_FOR_STYLE, reply_markup=kb)
+    else:
+        await bot.send_message(message.chat.id, 'Что-то не так :(\nПопробуй еще раз', reply_markup=kb)
 
 
 #############################################################################
 
-@dp.message_handler(commands=['cancel', 'gan'])
-async def dummy(message: types.Message):
-    await bot.send_message(message.chat.id, DUMMY, reply_markup=kb)
-
-
-@dp.message_handler()
-async def wrong(message: types.Message, state: FSMContext):
-    await bot.send_message(message.chat.id, WRONG_COMMAND, reply_markup=kb)
 
 
 async def on_startup(dp):
