@@ -22,9 +22,9 @@ from states import *
 
 logging.basicConfig(level=logging.INFO)
 
-BOT_TOKEN = os.environ.get('TOKEN') #'1512424491:AAGdEuGa_LMUwuijAA4IV6y7_DQztPoOmeE'
+BOT_TOKEN = os.environ.get('TOKEN')  # '1512424491:AAGdEuGa_LMUwuijAA4IV6y7_DQztPoOmeE'
 
-WEBHOOK_HOST = os.environ.get('WEBHOOK_HOST') #'https://glacial-beyond-67935.herokuapp.com/'
+WEBHOOK_HOST = os.environ.get('WEBHOOK_HOST')  # 'https://glacial-beyond-67935.herokuapp.com/'
 WEBHOOK_PATH = f'/{BOT_TOKEN}'
 WEBHOOK_URL = urljoin(WEBHOOK_HOST, WEBHOOK_PATH)
 
@@ -52,6 +52,7 @@ kb.add(button_cancel)
 async def hello(message: types.Message):
     await bot.send_message(message.chat.id, HELLO, reply_markup=kb)
 
+
 @dp.message_handler(commands=['help'], state="*")
 async def help(message: types.Message):
     await bot.send_message(message.chat.id, HELP, reply_markup=kb)
@@ -59,36 +60,28 @@ async def help(message: types.Message):
 
 @dp.message_handler(commands=['nst'], state="*")
 async def choose_nst(message: types.Message):
-    state = dp.current_state(user=message.from_user.id)
+    await TestStates.choose_nst.set()
 
-    await state.set_state(TestStates.choose_nst)
-
-    #await bot.send_message(message.chat.id, 'Состояние=' + await state.get_state())
+    # await bot.send_message(message.chat.id, 'Состояние=' + await state.get_state())
     await bot.send_message(message.chat.id, NST_CHOOSE, reply_markup=None)
 
-@dp.message_handler(commands=['so'])
-async def choose_nst(message: types.Message):
 
+@dp.message_handler(state=TestStates.choose_nst)
+async def choose_nst(message: types.Message):
     state = dp.current_state(user=message.from_user.id)
     res = 'Получил!' if message.photo is not None else 'Что-то не так :('
     await state.finish()
     await bot.send_message(message.chat.id, res, reply_markup=kb)
 
 
-@dp.message_handler(state=TestStates.choose_nst)
-async def choose_nst_(message: types.Message):
-
-    await bot.send_message(message.chat.id, 'гавно', reply_markup=kb)
-
-
-@dp.message_handler(commands=['cancel',  'gan'])
+@dp.message_handler(commands=['cancel', 'gan'])
 async def help(message: types.Message):
     await bot.send_message(message.chat.id, DUMMY, reply_markup=kb)
+
 
 @dp.message_handler()
 async def wrong(message: types.Message):
     await bot.send_message(message.chat.id, WRONG_COMMAND, reply_markup=kb)
-
 
 
 async def on_startup(dp):
