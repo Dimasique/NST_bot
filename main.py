@@ -79,8 +79,8 @@ async def help(message: types.Message):
 
 @dp.message_handler()
 async def wrong(message: types.Message, state: FSMContext):
-
-    await bot.send_message(message.chat.id, state)
+    st = await state.get_state()
+    await bot.send_message(message.chat.id, st)
     await bot.send_message(message.chat.id, WRONG_COMMAND, reply_markup=kb)
 
 
