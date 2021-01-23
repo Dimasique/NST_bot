@@ -60,20 +60,44 @@ async def help(message: types.Message):
     await bot.send_message(message.chat.id, HELP, reply_markup=kb)
 
 
+@dp.message_handler(commands=['cancel'], state="*")
+async def cancel(message: types.Message, state: FSMContext):
+    await state.finish()
+    await bot.send_message(message.chat.id, CANCEL, reply_markup=kb)
+
+
 # __________________________NST_________________________________________#
 
 @dp.message_handler(commands=['nst'], state="*")
 async def choose_nst(message: types.Message):
-    await TestStates.waiting_for_image_content.set()
+    await TestStates.waiting_for_content_nst.set()
     await bot.send_message(message.chat.id, NST_CHOOSE, reply_markup=empty_kb)
 
 
-@dp.message_handler(state=TestStates.waiting_for_image_content, content_types=ContentType.ANY)
-async def incoming_content(message: types.message):
+@dp.message_handler(state=TestStates.waiting_for_content_nst, content_types=ContentType.ANY)
+async def incoming_content_nst(message: types.message, state: FSMContext):
 
-    if len(message.photo) > 0:
+    if len(message.photo) == 1:
+        await state.update_data(content=message.photo[-1])
         await TestStates.waiting_for_style_nst.set()
         await bot.send_message(message.chat.id, WAIT_FOR_STYLE, reply_markup=kb)
+    else:
+        await bot.send_message(message.chat.id, 'Что-то не так :(\nПопробуй еще раз', reply_markup=kb)
+
+
+@dp.message_handler(state=TestStates.waiting_for_style_nst, content_types=ContentType.ANY)
+async def incoming_style_nst(message: types.message, state: FSMContext):
+
+    if len(message.photo) == 1:
+        await bot.send_message(message.chat.id, WORKING, reply_markup=kb)
+
+        async with state.proxy() as data:
+            data['style'] = message.photo[-1]
+
+            await bot.send_photo(message.chat.id, photo=data['style'], caption='это стиль')
+            await bot.send_photo(message.chat.id, photo=data['content'], caption='это контент')
+
+        await state.finish()
     else:
         await bot.send_message(message.chat.id, 'Что-то не так :(\nПопробуй еще раз', reply_markup=kb)
 
