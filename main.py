@@ -50,36 +50,39 @@ kb.add(button_help)
 kb.add(button_cancel)
 
 
-@dp.message_handler(commands=['start'], state="*")
-async def hello(message: types.Message):
-    await bot.send_message(message.chat.id, HELLO, reply_markup=kb)
-
-
-@dp.message_handler(commands=['help'], state="*")
-async def help(message: types.Message):
-    await bot.send_message(message.chat.id, HELP, reply_markup=kb)
-
-
-# __________________________NST_________________________________________#
-
-@dp.message_handler(commands=['nst'], state="*")
-async def choose_nst(message: types.Message):
-    await TestStates.waiting_for_image_content.set()
-    await bot.send_message(message.chat.id, NST_CHOOSE, reply_markup=empty_kb)
-
-
-@dp.message_handler(state=TestStates.waiting_for_image_content)
-async def choose_nst_(message, state: FSMContext):
-
-    if len(message.photo) > 0:
-        await TestStates.waiting_for_style_nst.set()
-        await bot.send_message(message.chat.id, WAIT_FOR_STYLE, reply_markup=kb)
-    else:
-        await bot.send_message(message.chat.id, 'Что-то не так :(\nПопробуй еще раз', reply_markup=kb)
-
+# @dp.message_handler(commands=['start'], state="*")
+# async def hello(message: types.Message):
+#     await bot.send_message(message.chat.id, HELLO, reply_markup=kb)
+# 
+# 
+# @dp.message_handler(commands=['help'], state="*")
+# async def help(message: types.Message):
+#     await bot.send_message(message.chat.id, HELP, reply_markup=kb)
+# 
+# 
+# # __________________________NST_________________________________________#
+# 
+# @dp.message_handler(commands=['nst'], state="*")
+# async def choose_nst(message: types.Message):
+#     await TestStates.waiting_for_image_content.set()
+#     await bot.send_message(message.chat.id, NST_CHOOSE, reply_markup=empty_kb)
+# 
+# 
+# @dp.message_handler(state=TestStates.waiting_for_image_content)
+# async def choose_nst_(message: types.message):
+# 
+#     if len(message.photo) > 0:
+#         await TestStates.waiting_for_style_nst.set()
+#         await bot.send_message(message.chat.id, WAIT_FOR_STYLE, reply_markup=kb)
+#     else:
+#         await bot.send_message(message.chat.id, 'Что-то не так :(\nПопробуй еще раз', reply_markup=kb)
 
 #############################################################################
 
+
+@dp.message_handler(state='*')
+async def choose_nst(message: types.Message):
+    await bot.send_message(message.chat.id, 'Поймал твое сообщение!')
 
 
 async def on_startup(dp):
