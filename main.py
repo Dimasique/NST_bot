@@ -22,6 +22,8 @@ from states import *
 
 from keyboards import *
 
+import nst
+
 logging.basicConfig(level=logging.INFO)
 
 BOT_TOKEN = os.environ.get('TOKEN')
@@ -92,9 +94,14 @@ async def incoming_style_nst(message: types.message, state: FSMContext):
 
         data_dict = await state.get_data()
 
-        #await bot.send_message(message.chat.id, type(data_dict['style']))
-        await bot.send_photo(message.chat.id, photo=data_dict['style'].file_id, caption='это стиль')
-        #await bot.send_photo(message.chat.id, photo=data_dict['content'], caption='это контент')
+        style = data_dict['style']
+        await style.download(f'{style.file_id}.jpg')
+
+        img = nst.upload_img(f'{style.file_id}.jpg')
+        await bot.send_message(message.chat.id, type(img), reply_markup=kb)
+
+        #await bot.send_photo(message.chat.id, photo=data_dict['style'].file_id, caption='это стиль')
+        #await bot.send_photo(message.chat.id, photo=data_dict['content'].file_id, caption='это контент')
 
         await state.finish()
     else:
