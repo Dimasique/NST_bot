@@ -68,7 +68,7 @@ async def choose_nst(message: types.Message):
     await bot.send_message(message.chat.id, NST_CHOOSE, reply_markup=empty_kb)
 
 
-@dp.message_handler(state=TestStates.waiting_for_image_content, content_types=['photo'])
+@dp.message_handler(state=TestStates.waiting_for_image_content, content_types=ContentType.ANY)
 async def incoming_content(message: types.message):
 
     if len(message.photo) > 0:
