@@ -90,11 +90,10 @@ async def incoming_style_nst(message: types.message, state: FSMContext):
         await bot.send_message(message.chat.id, WORKING, reply_markup=kb)
         await state.update_data(style=message.photo[-1])
 
-        style = await state.get_data('style')
-        content = await state.get_data('content')
+        data_dict = await state.get_data()
 
-        await bot.send_photo(message.chat.id, photo=style, caption='это стиль')
-        await bot.send_photo(message.chat.id, photo=content, caption='это контент')
+        await bot.send_photo(message.chat.id, photo=data_dict['style'], caption='это стиль')
+        await bot.send_photo(message.chat.id, photo=data_dict['content'], caption='это контент')
 
         await state.finish()
     else:
