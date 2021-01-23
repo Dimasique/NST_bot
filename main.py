@@ -76,7 +76,6 @@ async def choose_nst(message: types.Message):
 
 @dp.message_handler(state=TestStates.waiting_for_content_nst, content_types=ContentType.ANY)
 async def incoming_content_nst(message: types.message, state: FSMContext):
-
     if len(message.photo) > 0:
         await state.update_data(content=message.photo[-1])
         await TestStates.waiting_for_style_nst.set()
@@ -87,15 +86,15 @@ async def incoming_content_nst(message: types.message, state: FSMContext):
 
 @dp.message_handler(state=TestStates.waiting_for_style_nst, content_types=ContentType.ANY)
 async def incoming_style_nst(message: types.message, state: FSMContext):
-
     if len(message.photo) > 0:
         await bot.send_message(message.chat.id, WORKING, reply_markup=kb)
+        await state.update_data(style=message.photo[-1])
 
-        async with state.proxy() as data:
-            data['style'] = message.photo[-1]
+        style = await state.get_data('style')
+        content = await state.get_data('content')
 
-            await bot.send_photo(message.chat.id, photo=data['style'], caption='это стиль')
-            await bot.send_photo(message.chat.id, photo=data['content'], caption='это контент')
+        await bot.send_photo(message.chat.id, photo=style, caption='это стиль')
+        await bot.send_photo(message.chat.id, photo=content, caption='это контент')
 
         await state.finish()
     else:
@@ -103,7 +102,6 @@ async def incoming_style_nst(message: types.message, state: FSMContext):
 
 
 #############################################################################
-
 
 
 async def on_startup(dp):
