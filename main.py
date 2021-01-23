@@ -77,7 +77,7 @@ async def choose_nst(message: types.Message):
 @dp.message_handler(state=TestStates.waiting_for_content_nst, content_types=ContentType.ANY)
 async def incoming_content_nst(message: types.message, state: FSMContext):
 
-    if len(message.photo) == 1:
+    if len(message.photo) > 0:
         await state.update_data(content=message.photo[-1])
         await TestStates.waiting_for_style_nst.set()
         await bot.send_message(message.chat.id, WAIT_FOR_STYLE, reply_markup=kb)
@@ -88,7 +88,7 @@ async def incoming_content_nst(message: types.message, state: FSMContext):
 @dp.message_handler(state=TestStates.waiting_for_style_nst, content_types=ContentType.ANY)
 async def incoming_style_nst(message: types.message, state: FSMContext):
 
-    if len(message.photo) == 1:
+    if len(message.photo) > 0:
         await bot.send_message(message.chat.id, WORKING, reply_markup=kb)
 
         async with state.proxy() as data:
