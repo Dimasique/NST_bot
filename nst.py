@@ -2,6 +2,7 @@ from PIL import Image
 from model import model, gram_matrix, transformer
 import torch.nn.functional as F
 import torch.optim as optim
+from tqdm import tqdm
 
 import copy
 
@@ -46,21 +47,19 @@ def run(style_path, content_path):
     style_weight = 200000
     content_weight = 1
 
-    style_losses = [model[2], model[5], model[9], model[16]]
-    content_losses = [model[12]]
+    style_losses = [model_nst[2], model_nst[5], model_nst[9], model_nst[16]]
+    content_losses = [model_nst[12]]
 
     input_img = content.clone()
     optimizer = optimizer = optim.LBFGS([input_img.requires_grad_()])
-    run_ = [0]
 
-    while run_[0] <= epoch_num:
+    for _ in tqdm(range(epoch_num)):
 
         def closure():
             input_img.data.clamp_(0, 1)
             optimizer.zero_grad()
 
-            cur = model(input_img)
-            print(cur)
+            cur = model_nst(input_img)
 
             style_score = 0
             content_score = 0
@@ -75,10 +74,9 @@ def run(style_path, content_path):
                 loss = style_score + content_score
                 loss.backward()
 
-                run_[0] += 1
                 return style_score + content_score
 
-        #optimizer.step(closure)
+        optimizer.step(closure)
 
     input_img.data.clamp_(0, 1)
     return input_img
