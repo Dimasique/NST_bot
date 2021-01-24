@@ -8,6 +8,7 @@ from aiogram.dispatcher import Dispatcher, FSMContext
 from aiogram.dispatcher.webhook import SendMessage
 from aiogram.utils.executor import start_webhook
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from aiogram.types import InputFile
 
 from aiogram.types.message import ContentType
 
@@ -103,7 +104,9 @@ async def incoming_style_nst(message: types.message, state: FSMContext):
         await style.download(content_name)
 
         await bot.send_message(message.chat.id, WORKING, reply_markup=kb)
-        await bot.send_photo(message.chat.id, style_name)
+
+        ph = InputFile(path_or_bytesio=style_name)
+        await bot.send_photo(message.chat.id, ph)
 
         #result = nst.run(style_name, content_name)
         #result.save("res.jpg")
