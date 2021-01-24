@@ -39,6 +39,7 @@ loop = asyncio.get_event_loop()
 bot = Bot(token=BOT_TOKEN, loop=loop)
 
 dp = Dispatcher(bot, storage=MemoryStorage())
+dp.middleware.setup(LoggingMiddleware())
 
 button_nst = KeyboardButton('/nst')
 button_gan = KeyboardButton('/gan')
@@ -97,11 +98,11 @@ async def incoming_style_nst(message: types.message, state: FSMContext):
         style = data_dict['style']
         content = data_dict['content']
 
-        style_name = f'{style.file_id}.jpg'
-        content_name = f'{content.file_id}.jpg'
+        style_name = f'data/{style.file_id}.jpg'
+        content_name = f'data/{content.file_id}.jpg'
 
-        await style.download(style_name)
-        await style.download(content_name)
+        #await style.download(style_name)
+        #await style.download(content_name)
 
         await bot.send_message(message.chat.id, WORKING, reply_markup=kb)
 
