@@ -38,6 +38,10 @@ class StyleLoss(nn.Module):
 
 
   def forward(self, style):
+
+    #print(style.size)
+    #print(self.target.size)
+
     self.loss = F.mse_loss(gram_matrix(style), self.target)
     return style
 

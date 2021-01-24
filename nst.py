@@ -59,7 +59,8 @@ def run(style_path, content_path):
             input_img.data.clamp_(0, 1)
             optimizer.zero_grad()
 
-            model(input_img)
+            cur = model(input_img)
+            print(cur)
 
             style_score = 0
             content_score = 0
@@ -77,7 +78,9 @@ def run(style_path, content_path):
                 run_[0] += 1
                 return style_score + content_score
 
-        optimizer.step(closure)
+        #optimizer.step(closure)
 
     input_img.data.clamp_(0, 1)
     return input_img
+
+
