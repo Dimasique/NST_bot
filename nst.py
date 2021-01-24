@@ -13,8 +13,8 @@ def upload_img(image_name):
 
 def run(style_path, content_path):
 
-    style = transformer(upload_img(style_path))
-    content = transformer(upload_img(content_path))
+    style = transformer(upload_img(style_path)).unsqueeze(0)
+    content = transformer(upload_img(content_path)).unsqueeze(0)
 
     model_nst = copy.deepcopy(model)
 
