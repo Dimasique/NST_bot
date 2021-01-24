@@ -1,5 +1,5 @@
 from PIL import Image
-#import torchvision.models as models
+import torchvision.models as models
 
 
 def upload_img(image_name):
