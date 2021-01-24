@@ -2,7 +2,6 @@ from PIL import Image
 from model import model, gram_matrix, transformer
 import torch.nn.functional as F
 import torch.optim as optim
-from tqdm import tqdm
 
 import copy
 
@@ -53,7 +52,7 @@ def run(style_path, content_path):
     input_img = content.clone()
     optimizer = optimizer = optim.LBFGS([input_img.requires_grad_()])
 
-    for _ in tqdm(range(epoch_num)):
+    for _ in range(epoch_num):
 
         def closure():
             input_img.data.clamp_(0, 1)
