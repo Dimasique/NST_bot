@@ -90,7 +90,6 @@ async def incoming_content_nst(message: types.message, state: FSMContext):
 
 @dp.message_handler(state=TestStates.waiting_for_style_nst, content_types=ContentType.ANY)
 async def incoming_style_nst(message: types.message, state: FSMContext):
-
     if len(message.photo) > 0:
 
         data_dict = await state.get_data()
@@ -104,6 +103,12 @@ async def incoming_style_nst(message: types.message, state: FSMContext):
         await style.download(content_name)
 
         await bot.send_message(message.chat.id, WORKING, reply_markup=kb)
+
+        result = nst.run(style_name, content_name)
+        result.save("res.jpg")
+
+        await bot.send_photo(message.chat.id, 'res.jpg', 'Вуаля!')
+
         await state.finish()
 
     else:
