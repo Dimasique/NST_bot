@@ -37,6 +37,7 @@ WEBAPP_PORT = os.environ.get('PORT')
 
 loop = asyncio.get_event_loop()
 bot = Bot(token=BOT_TOKEN, loop=loop)
+
 dp = Dispatcher(bot, storage=MemoryStorage())
 
 button_nst = KeyboardButton('/nst')
