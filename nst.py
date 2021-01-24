@@ -1,5 +1,6 @@
 from PIL import Image
-from model import *
+from model import model, gram_matrix
+import torch.nn.functional as F
 
 import copy
 
@@ -44,9 +45,6 @@ def run(style_path, content_path):
     style_weight = 200000
     content_weight = 1
 
-    # model, style_losses, content_losses = self.build_model(cnn, style, content)
-    # print(model)
-    # torch.save(model.state_dict(), 'model_nst.pt')
     style_losses = [model[2], model[5], model[9], model[16]]
     content_losses = [model[12]]
 
