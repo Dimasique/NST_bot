@@ -97,8 +97,8 @@ async def incoming_style_nst(message: types.message, state: FSMContext):
         style = message.photo[-1]
         content = data_dict['content']
 
-        style_name = f'data/{style.file_id}.jpg'
-        content_name = f'data/{content.file_id}.jpg'
+        style_name = f'{style.file_id}.jpg'
+        content_name = f'{content.file_id}.jpg'
 
         await style.download(style_name)
         await style.download(content_name)
