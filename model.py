@@ -89,5 +89,5 @@ model.add_module('pool_4', nn.MaxPool2d(kernel_size=2, stride=2, padding=0, dila
 model.add_module('conv_5', nn.Conv2d(128, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)))
 model.add_module('style_loss_5', StyleLoss())
 
-model.load_state_dict(torch.load('model_nst.pt'))
+model.load_state_dict(torch.load('model_nst.pt', map_location='cpu'))
 model.eval()
