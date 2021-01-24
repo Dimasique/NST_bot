@@ -90,28 +90,22 @@ async def incoming_content_nst(message: types.message, state: FSMContext):
 
 @dp.message_handler(state=TestStates.waiting_for_style_nst, content_types=ContentType.ANY)
 async def incoming_style_nst(message: types.message, state: FSMContext):
+
     if len(message.photo) > 0:
-        await bot.send_message(message.chat.id, WORKING, reply_markup=kb)
-        await state.update_data(style=message.photo[-1])
 
         data_dict = await state.get_data()
-        style = data_dict['style']
+        style = message.photo[-1]
         content = data_dict['content']
 
         style_name = f'data/{style.file_id}.jpg'
         content_name = f'data/{content.file_id}.jpg'
 
-        #await style.download(style_name)
-        #await style.download(content_name)
+        await style.download(style_name)
+        await style.download(content_name)
 
         await bot.send_message(message.chat.id, WORKING, reply_markup=kb)
-
-        ok = nst.upload_vgg()
-
-        # await bot.send_photo(message.chat.id, photo=data_dict['style'].file_id, caption='это стиль')
-        # await bot.send_photo(message.chat.id, photo=data_dict['content'].file_id, caption='это контент')
-
         await state.finish()
+
     else:
         await bot.send_message(message.chat.id, 'Что-то не так :(\nПопробуй еще раз', reply_markup=kb)
 
