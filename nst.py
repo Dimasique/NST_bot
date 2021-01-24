@@ -1,5 +1,5 @@
 from PIL import Image
-from model import model, gram_matrix
+from model import model, gram_matrix, transformer
 import torch.nn.functional as F
 import torch.optim as optim
 
@@ -13,8 +13,8 @@ def upload_img(image_name):
 
 def run(style_path, content_path):
 
-    style = upload_img(style_path)
-    content = upload_img(content_path)
+    style = transformer(upload_img(style_path))
+    content = transformer(upload_img(content_path))
 
     model_nst = copy.deepcopy(model)
 
