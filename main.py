@@ -105,13 +105,10 @@ async def incoming_style_nst(message: types.message, state: FSMContext):
 
         await bot.send_message(message.chat.id, WORKING, reply_markup=kb)
 
-        ph = InputFile(path_or_bytesio=style_name)
-        await bot.send_photo(message.chat.id, ph)
-
-        #result = nst.run(style_name, content_name)
-        #result.save("res.jpg")
-
-        #await bot.send_photo(message.chat.id, 'res.jpg', 'Вуаля!')
+        result = nst.run(style_name, content_name)
+        result.save("res.jpg")
+        answer = InputFile(path_or_bytesio='res.jpg')
+        await bot.send_photo(message.chat.id, answer, 'Вуаля!')
 
         await state.finish()
 
