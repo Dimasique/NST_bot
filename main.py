@@ -93,15 +93,21 @@ async def incoming_style_nst(message: types.message, state: FSMContext):
         await state.update_data(style=message.photo[-1])
 
         data_dict = await state.get_data()
-
         style = data_dict['style']
-        await style.download(f'{style.file_id}.jpg')
+        content = data_dict['content']
 
-        img = nst.upload_img(f'{style.file_id}.jpg')
-        await bot.send_message(message.chat.id, type(img), reply_markup=kb)
+        style_name = f'{style.file_id}.jpg'
+        content_name = f'{content.file_id}.jpg'
 
-        #await bot.send_photo(message.chat.id, photo=data_dict['style'].file_id, caption='это стиль')
-        #await bot.send_photo(message.chat.id, photo=data_dict['content'].file_id, caption='это контент')
+        await style.download(style_name)
+        await style.download(content_name)
+
+        await bot.send_message(message.chat.id, WORKING, reply_markup=kb)
+
+        ok = nst.upload_vgg()
+
+        # await bot.send_photo(message.chat.id, photo=data_dict['style'].file_id, caption='это стиль')
+        # await bot.send_photo(message.chat.id, photo=data_dict['content'].file_id, caption='это контент')
 
         await state.finish()
     else:
