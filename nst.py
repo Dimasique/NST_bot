@@ -2,6 +2,8 @@ from PIL import Image
 from model import model, gram_matrix, transformer
 import torch.nn.functional as F
 import torch.optim as optim
+from tqdm import tqdm
+import torchvision.transforms as transforms
 
 import copy
 
@@ -50,10 +52,9 @@ def run(style_path, content_path):
     content_losses = [model_nst[12]]
 
     input_img = content.clone()
-    optimizer = optimizer = optim.LBFGS([input_img.requires_grad_()])
+    optimizer = optim.LBFGS([input_img.requires_grad_()])
 
-    for _ in range(epoch_num):
-
+    for _ in tqdm(range(epoch_num)):
         def closure():
             input_img.data.clamp_(0, 1)
             optimizer.zero_grad()
@@ -81,3 +82,6 @@ def run(style_path, content_path):
     return input_img
 
 
+def save(img):
+    image = transforms.ToPILImage()(img.squeeze(0))
+    image.save('result.jpg')
