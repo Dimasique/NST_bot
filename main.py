@@ -21,7 +21,6 @@ from urllib.parse import urljoin
 from answers import *
 from states import *
 
-from keyboards import *
 
 import nst
 
@@ -76,7 +75,7 @@ async def cancel(message: types.Message, state: FSMContext):
 @dp.message_handler(commands=['nst'], state="*")
 async def choose_nst(message: types.Message):
     await TestStates.waiting_for_content_nst.set()
-    await bot.send_message(message.chat.id, NST_CHOOSE, reply_markup=empty_kb)
+    await bot.send_message(message.chat.id, NST_CHOOSE, reply_markup=kb)
 
 
 @dp.message_handler(state=TestStates.waiting_for_content_nst, content_types=ContentType.ANY)
@@ -86,7 +85,7 @@ async def incoming_content_nst(message: types.message, state: FSMContext):
         await TestStates.waiting_for_style_nst.set()
         await bot.send_message(message.chat.id, WAIT_FOR_STYLE, reply_markup=kb)
     else:
-        await bot.send_message(message.chat.id, 'Что-то не так :(\nПопробуй еще раз', reply_markup=kb)
+        await bot.send_message(message.chat.id, GET_ERROR, reply_markup=kb)
 
 
 @dp.message_handler(state=TestStates.waiting_for_style_nst, content_types=ContentType.ANY)
@@ -107,25 +106,33 @@ async def incoming_style_nst(message: types.message, state: FSMContext):
 
         nst.run(style_name, content_name)
         answer = InputFile(path_or_bytesio='res.jpg')
-        await bot.send_photo(message.chat.id, answer, 'Готово!')
+        await bot.send_photo(message.chat.id, answer, DONE)
 
         await state.finish()
 
     else:
-        await bot.send_message(message.chat.id, 'Что-то не так :(\nПопробуй еще раз', reply_markup=kb)
+        await bot.send_message(message.chat.id, GET_ERROR, reply_markup=kb)
 
 
 #############################################################################
+
+@dp.message_handler(commands=['gan'])
+async def wrong_message(message: types.message):
+    await bot.send_message(message.chat.id, GAN_CHOOSE, reply_markup=kb)
+
+
+
+@dp.message_handler(state="*", content_types=ContentType.ANY)
+async def wrong_message(message: types.message):
+    await bot.send_message(message.chat.id, WRONG_COMMAND, reply_markup=kb)
 
 
 async def on_startup(dp):
     await bot.delete_webhook()
     await bot.set_webhook(WEBHOOK_URL)
-    # insert code here to run it after start
 
 
 async def on_shutdown(dp):
-    # insert code here to run it before shutdown
     pass
 
 
