@@ -7,7 +7,7 @@ import torch
 from model import Net
 from torch.autograd import Variable
 
-IMAGE_SIZE = 512
+IMAGE_SIZE = 256
 
 
 def load(path):
