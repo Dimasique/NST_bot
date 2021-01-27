@@ -1,87 +1,58 @@
 from PIL import Image
-from model import model, gram_matrix, transformer
 import torch.nn.functional as F
 import torch.optim as optim
-from tqdm import tqdm
 import torchvision.transforms as transforms
+import numpy as np
+import torch
+from model import Net
+from torch.autograd import Variable
 
 import copy
 
+IMAGE_SIZE = 128
 
-def upload_img(image_name):
-    image = Image.open(image_name)
-    return image
+
+def load(path):
+    img = Image.open(path).convert('RGB')
+    img = img.resize((IMAGE_SIZE, IMAGE_SIZE), Image.ANTIALIAS)
+
+    img = np.array(img).transpose(2, 0, 1)
+    img = torch.from_numpy(img).float()
+    return img.unsqueeze(0)
+
+
+def preprocess_batch(batch):
+    batch = batch.transpose(0, 1)
+    (r, g, b) = torch.chunk(batch, 3)
+    batch = torch.cat((b, g, r))
+    batch = batch.transpose(0, 1)
+    return batch
 
 
 def run(style_path, content_path):
+    content = load(content_path)
+    style = load(style_path)
 
-    style = transformer(upload_img(style_path)).unsqueeze(0)
-    content = transformer(upload_img(content_path)).unsqueeze(0)
+    style = preprocess_batch(style)
 
-    model_nst = copy.deepcopy(model)
+    style_model = Net()
+    model_dict = torch.load('./weights.model')
 
-    style1 = model_nst[1](model_nst[0](style))
-    model_nst[2].target = gram_matrix(style1).detach()
-    model_nst[2].loss = F.mse_loss(model_nst[2].target, model_nst[2].target)
+    style_model.load_state_dict(model_dict, False)
 
-    style2 = model_nst[4](model_nst[3](model_nst[2](style1)))
-    model_nst[5].target = gram_matrix(style2).detach()
-    model_nst[5].loss = F.mse_loss(model_nst[5].target, model_nst[5].target)
+    style_v = Variable(style)
 
-    style3 = model_nst[8](model_nst[7](model_nst[6](model_nst[5](style2))))
-    model_nst[9].target = gram_matrix(style3).detach()
-    model_nst[9].loss = F.mse_loss(model_nst[9].target, model_nst[9].target)
-
-    style4 = model_nst[11](model_nst[10](model_nst[9](style3)))
-
-    style5 = model_nst[15](model_nst[14](model_nst[13](style4)))
-    model_nst[16].target = gram_matrix(style5).detach()
-    model_nst[16].loss = F.mse_loss(model_nst[16].target, model_nst[16].target)
-
-    content4 = model_nst[11](model_nst[10](
-        model_nst[9](model_nst[8](model_nst[7](model_nst[6](
-            model_nst[5](model_nst[4](model_nst[3](model_nst[2](model_nst[1](model_nst[0](content))))))))))))
-    model_nst[12].target = content4.detach()
-    model_nst[12].loss = F.mse_loss(model_nst[12].target, model_nst[12].target)
-
-    epoch_num = 500
-    style_weight = 200000
-    content_weight = 1
-
-    style_losses = [model_nst[2], model_nst[5], model_nst[9], model_nst[16]]
-    content_losses = [model_nst[12]]
-
-    input_img = content.clone()
-    optimizer = optim.LBFGS([input_img.requires_grad_()])
-
-    for _ in tqdm(range(epoch_num)):
-        def closure():
-            input_img.data.clamp_(0, 1)
-            optimizer.zero_grad()
-
-            cur = model_nst(input_img)
-
-            style_score = 0
-            content_score = 0
-            for sl in style_losses:
-                style_score += sl.loss
-            for cl in content_losses:
-                content_score += cl.loss
-
-                style_score *= style_weight
-                content_score *= content_weight
-
-                loss = style_score + content_score
-                loss.backward()
-
-                return style_score + content_score
-
-        optimizer.step(closure)
-
-    input_img.data.clamp_(0, 1)
-    return input_img
+    content_image = Variable(preprocess_batch(content))
+    style_model.setTarget(style_v)
+    output = style_model(content_image)
+    save(output[0])
 
 
 def save(img):
-    image = transforms.ToPILImage()(img.squeeze(0))
-    image.save('result.jpg')
+    (b, g, r) = torch.chunk(img, 3)
+    img = torch.cat((r, g, b))
+
+    img = img.clone().clamp(0, 255).detach().numpy()
+    img = img.transpose(1, 2, 0).astype('uint8')
+    img = Image.fromarray(img)
+    img.save('res.jpg')
