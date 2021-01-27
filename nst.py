@@ -7,8 +7,6 @@ import torch
 from model import Net
 from torch.autograd import Variable
 
-import copy
-
 IMAGE_SIZE = 256
 
 
