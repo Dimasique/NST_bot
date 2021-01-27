@@ -28,8 +28,8 @@ def preprocess_batch(batch):
 
 
 def run(style_path, content_path):
-    content = load(content_path)
-    style = load(style_path)
+    content = load(content_path).requires_grad_(False)
+    style = load(style_path).requires_grad_(False)
 
     style = preprocess_batch(style)
 
@@ -39,10 +39,8 @@ def run(style_path, content_path):
     style_model.load_state_dict(model_dict, False)
     style_model.eval()
 
-    style_v = Variable(style)
-
-    content_image = Variable(preprocess_batch(content))
-    style_model.setTarget(style_v)
+    content_image = preprocess_batch(content)
+    style_model.setTarget(style)
     output = style_model(content_image)
     save(output[0])
 
