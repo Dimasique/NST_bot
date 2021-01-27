@@ -9,7 +9,7 @@ from torch.autograd import Variable
 
 import copy
 
-IMAGE_SIZE = 128
+IMAGE_SIZE = 256
 
 
 def load(path):
