@@ -37,6 +37,7 @@ def run(style_path, content_path):
     model_dict = torch.load('./weights.model')
 
     style_model.load_state_dict(model_dict, False)
+    style_model.eval()
 
     style_v = Variable(style)
 
