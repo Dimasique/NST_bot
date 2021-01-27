@@ -2,6 +2,5 @@ aiogram==2.11.2
 asyncio==3.4.3
 pillow==8.1.0
 -f https://download.pytorch.org/whl/torch_stable.html
-torch~=1.7.1
 torch==1.6.0+cpu
 torchvision==0.7.0+cpu
