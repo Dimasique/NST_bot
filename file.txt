@@ -1,0 +1,1 @@
+./GAN/res_gan/res.jpg

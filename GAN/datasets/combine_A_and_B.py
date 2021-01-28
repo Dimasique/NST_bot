@@ -21,8 +21,8 @@ parser.add_argument('--use_AB', dest='use_AB', help='if true: (0001_A, 0001_B) t
 parser.add_argument('--no_multiprocessing', dest='no_multiprocessing', help='If used, chooses single CPU execution instead of parallel execution', action='store_true',default=False)
 args = parser.parse_args()
 
-for arg in vars(args):
-    print('[%s] = ' % arg, getattr(args, arg))
+#for arg in vars(args):
+    #print('[%s] = ' % arg, getattr(args, arg))
 
 splits = os.listdir(args.fold_A)
 
@@ -37,11 +37,11 @@ for sp in splits:
         img_list = [img_path for img_path in img_list if '_A.' in img_path]
 
     num_imgs = min(args.num_imgs, len(img_list))
-    print('split = %s, use %d/%d images' % (sp, num_imgs, len(img_list)))
+    #print('split = %s, use %d/%d images' % (sp, num_imgs, len(img_list)))
     img_fold_AB = os.path.join(args.fold_AB, sp)
     if not os.path.isdir(img_fold_AB):
         os.makedirs(img_fold_AB)
-    print('split = %s, number of images = %d' % (sp, num_imgs))
+    #print('split = %s, number of images = %d' % (sp, num_imgs))
     for n in range(num_imgs):
         name_A = img_list[n]
         path_A = os.path.join(img_fold_A, name_A)

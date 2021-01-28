@@ -43,7 +43,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     dataset_folder = args.dataset_path
-    print(dataset_folder)
+    #print(dataset_folder)
 
     test_a_path = os.path.join(dataset_folder, 'testA')
     test_b_path = os.path.join(dataset_folder, 'testB')

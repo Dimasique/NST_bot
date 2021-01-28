@@ -29,8 +29,6 @@ def save_images(visuals, image_path, aspect_ratio=1.0, width=256):
     short_path = ntpath.basename(image_path[0])
     name = os.path.splitext(short_path)[0]
 
-    ims, txts, links = [], [], []
-
     for label, im_data in visuals.items():
       if label == 'real':
         continue
@@ -38,7 +36,7 @@ def save_images(visuals, image_path, aspect_ratio=1.0, width=256):
       image_name = 'res.jpg'
       save_path = os.path.join(image_dir, image_name)
       util.save_image(im, save_path, aspect_ratio=aspect_ratio)
-      break
+      return save_path
 
 
 class Visualizer():
@@ -214,7 +212,7 @@ class Visualizer():
         for k, v in losses.items():
             message += '%s: %.3f ' % (k, v)
 
-        print(message)  # print the message
+        #print(message)  # print the message
         with open(self.log_name, "a") as log_file:
             log_file.write('%s\n' % message)  # save the message
 

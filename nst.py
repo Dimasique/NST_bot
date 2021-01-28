@@ -38,7 +38,6 @@ def run(style_path, content_path, another):
     another = preprocess_batch(another)
 
     style_model = Net()
-    print(style_model)
     model_dict = torch.load('./weights.model')
 
     style_model.load_state_dict(model_dict, False)
@@ -62,5 +61,5 @@ def save(img):
 
 
 def run_gan(name):
-    os.system(f'python ./GAN/test.py --dataroot ./GAN/img --name style_monet_pretrained --model test --no_dropout')
+    os.system(f'python ./GAN/test.py --dataroot ./GAN/img --name style_monet_pretrained --model test --no_dropout > file.txt')
     os.remove(f'./GAN/img/{name}.jpg')

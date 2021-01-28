@@ -56,5 +56,5 @@ if __name__ == '__main__':
         model.test()           # run inference
         visuals = model.get_current_visuals()  # get image results
         img_path = model.get_image_paths()     # get image paths
-        save_images(visuals, img_path, aspect_ratio=opt.aspect_ratio, width=opt.display_winsize)
+        print(save_images(visuals, img_path, aspect_ratio=opt.aspect_ratio, width=opt.display_winsize))
 
