@@ -132,7 +132,7 @@ async def incoming_conten_gan(message: types.message, state: FSMContext):
         await content.download(content_name)
 
         await bot.send_message(message.chat.id, WORKING, reply_markup=kb)
-        answer = InputFile(path_or_bytesio='./GAN/res_gan/res.jpg')
+        answer = InputFile(path_or_bytesio='GAN/res_gan/res.jpg')
 
         nst.run_gan(content.file_id)
         await bot.send_photo(message.chat.id, answer, DONE)
