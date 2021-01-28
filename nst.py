@@ -5,7 +5,9 @@ import torchvision.transforms as transforms
 import numpy as np
 import torch
 from model import Net
-from torch.autograd import Variable
+import os
+import subprocess
+
 
 IMAGE_SIZE = 256
 
@@ -27,20 +29,23 @@ def preprocess_batch(batch):
     return batch
 
 
-def run(style_path, content_path):
+def run(style_path, content_path, another):
     content = load(content_path).requires_grad_(False)
     style = load(style_path).requires_grad_(False)
+    another = load(another).requires_grad_(False)
 
     style = preprocess_batch(style)
+    another = preprocess_batch(another)
 
     style_model = Net()
+    print(style_model)
     model_dict = torch.load('./weights.model')
 
     style_model.load_state_dict(model_dict, False)
     style_model.eval()
 
     content_image = preprocess_batch(content)
-    style_model.setTarget(style)
+    style_model.setTarget(style, another)
     output = style_model(content_image)
     save(output[0])
 
@@ -53,3 +58,9 @@ def save(img):
     img = img.transpose(1, 2, 0).astype('uint8')
     img = Image.fromarray(img)
     img.save('res.jpg')
+
+
+
+def run_gan(name):
+    os.system(f'python ./GAN/test.py --dataroot ./GAN/img --name style_monet_pretrained --model test --no_dropout')
+    os.remove(f'./GAN/img/{name}.jpg')
