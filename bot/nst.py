@@ -49,7 +49,7 @@ def save(img):
     img = img.clone().clamp(0, 255).detach().numpy()
     img = img.transpose(1, 2, 0).astype('uint8')
     img = Image.fromarray(img)
-    img.save('result/res.jpg')
+    img.save('bot/result/res.jpg')
 
 
 def run_gan(img, model):
