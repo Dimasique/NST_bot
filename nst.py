@@ -29,13 +29,11 @@ def preprocess_batch(batch):
     return batch
 
 
-def run(style_path, content_path, another):
+def run(style_path, content_path):
     content = load(content_path).requires_grad_(False)
     style = load(style_path).requires_grad_(False)
-    another = load(another).requires_grad_(False)
 
     style = preprocess_batch(style)
-    another = preprocess_batch(another)
 
     style_model = Net()
     model_dict = torch.load('./weights.model')
@@ -44,7 +42,7 @@ def run(style_path, content_path, another):
     style_model.eval()
 
     content_image = preprocess_batch(content)
-    style_model.setTarget(style, another)
+    style_model.setTarget(style)
     output = style_model(content_image)
     save(output[0])
 
@@ -61,5 +59,5 @@ def save(img):
 
 
 def run_gan(name):
-    os.system(f'python ./GAN/test.py --dataroot ./GAN/img --name style_monet_pretrained --model test --no_dropout > file.txt')
-    os.remove(f'./GAN/img/{name}.jpg')
+    os.system(f'python ./GAN/test.py --dataroot ./GAN/img --name style_monet_pretrained --model test --no_dropout >> file.txt')
+    #os.remove(f'./GAN/img/{name}.jpg')

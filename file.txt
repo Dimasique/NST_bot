@@ -1,1 +1,2 @@
+/home/dmitry/PycharmProjects/NST_bot
 ./GAN/res_gan/res.jpg

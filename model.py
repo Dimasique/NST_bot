@@ -180,16 +180,16 @@ class Net(nn.Module):
 
         self.model = nn.Sequential(*model)
 
-    def setTarget(self, Xs1, Xs2):
+    def setTarget(self, Xs1):
         F1 = self.model1(Xs1)
-        F2 = self.model1(Xs2)
+        #F2 = self.model1(Xs2)
 
-        _, _, _, m = F1.shape
+        #_, _, _, m = F1.shape
 
         #F1 = torch.clone(F1[:, :, :, m//2:])
         #F2 = torch.clone(F2[:, :, :, :m//2])
 
-        G = self.gram(torch.cat((F2, F1), 3))
+        G = self.gram(torch.cat(F1))
         self.ins.setTarget(G)
 
     def forward(self, input):
