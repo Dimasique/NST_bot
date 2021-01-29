@@ -189,7 +189,7 @@ class Net(nn.Module):
         #F1 = torch.clone(F1[:, :, :, m//2:])
         #F2 = torch.clone(F2[:, :, :, :m//2])
 
-        G = self.gram(torch.cat(F1))
+        G = self.gram(F1)
         self.ins.setTarget(G)
 
     def forward(self, input):
