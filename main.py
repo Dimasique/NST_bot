@@ -133,11 +133,13 @@ async def incoming_conten_gan(message: types.message, state: FSMContext):
 
         await bot.send_message(message.chat.id, WORKING, reply_markup=kb)
 
+        nst.run_gan(content.file_id)
+
         with open('file.txt') as f:
             path = f.read()[:-1]
+
         answer = InputFile(path_or_bytesio=path)
 
-        nst.run_gan(content.file_id)
         await bot.send_photo(message.chat.id, answer, DONE)
 
         await state.finish()

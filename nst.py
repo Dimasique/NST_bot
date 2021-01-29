@@ -59,5 +59,5 @@ def save(img):
 
 
 def run_gan(name):
-    os.system(f'python ./GAN/test.py --dataroot ./GAN/img --name style_monet_pretrained --model test --no_dropout >> file.txt')
+    os.system(f'python ./GAN/test.py --dataroot ./GAN/img --name style_monet_pretrained --model test --no_dropout > file.txt')
     #os.remove(f'./GAN/img/{name}.jpg')
