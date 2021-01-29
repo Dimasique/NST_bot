@@ -131,16 +131,19 @@ async def wrong_message(message: types.message):
 
 
 @dp.callback_query_handler(lambda c: c.data == 'vangogh', state=GAN_States.waiting_for_painter)
-async def process_callback_button1(callback_query: types.CallbackQuery):
+async def process_callback_button1(callback_query: types.CallbackQuery, state: FSMContext):
     await bot.answer_callback_query(callback_query.id)
     await GAN_States.waiting_for_content.set()
-    await bot.send_message(callback_query.from_user.id, 'Нажата первая кнопка!')
+    await bot.send_message(callback_query.from_user.id, WAITING_FOR_IMAGE)
+    await state.update_data(model='style_vangogh')
+
 
 @dp.callback_query_handler(lambda c: c.data == 'monet', state=GAN_States.waiting_for_painter)
-async def process_callback_button2(callback_query: types.CallbackQuery):
+async def process_callback_button2(callback_query: types.CallbackQuery, state: FSMContext):
     await bot.answer_callback_query(callback_query.id)
     await GAN_States.waiting_for_content.set()
-    await bot.send_message(callback_query.from_user.id, 'Нажата вторая кнопка!')
+    await bot.send_message(callback_query.from_user.id, WAITING_FOR_IMAGE)
+    await state.update_data(model='style_monet')
 
 
 @dp.message_handler(state=GAN_States.waiting_for_content, content_types=ContentType.ANY)
@@ -152,8 +155,9 @@ async def incoming_content_gan(message: types.message, state: FSMContext):
 
         await content.download(content_name)
         await bot.send_message(message.chat.id, WORKING, reply_markup=kb)
+        data = await state.get_data()
 
-        nst.run_gan(content.file_id, 'style_monet')
+        nst.run_gan(content.file_id, data['model'])
         path = './GAN/res_gan/res.jpg'
 
         answer = InputFile(path_or_bytesio=path)
