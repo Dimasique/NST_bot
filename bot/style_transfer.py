@@ -31,7 +31,7 @@ def run_nst(style_path, content_path):
     style = preprocess_batch(style)
 
     style_model = Net()
-    model_dict = torch.load('./weights.model')
+    model_dict = torch.load('./NST/weights.model')
 
     style_model.load_state_dict(model_dict, False)
     style_model.eval()

@@ -180,13 +180,6 @@ class Net(nn.Module):
 
     def setTarget(self, Xs1):
         F1 = self.model1(Xs1)
-        #F2 = self.model1(Xs2)
-
-        #_, _, _, m = F1.shape
-
-        #F1 = torch.clone(F1[:, :, :, m//2:])
-        #F2 = torch.clone(F2[:, :, :, :m//2])
-
         G = self.gram(F1)
         self.ins.setTarget(G)
 

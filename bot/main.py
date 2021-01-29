@@ -17,7 +17,7 @@ from utils.answers import *
 from utils.states import *
 from utils.keyboards import *
 
-import nst
+import style_transfer
 
 logging.basicConfig(level=logging.INFO)
 
@@ -87,7 +87,7 @@ async def incoming_style_nst(message: types.message, state: FSMContext):
 
         await bot.send_message(message.chat.id, WORKING, reply_markup=kb)
 
-        nst.run_nst(style_name, content_name)
+        style_transfer.run_nst(style_name, content_name)
         answer = InputFile(path_or_bytesio='bot/result/res.jpg')
         await bot.send_photo(message.chat.id, answer, DONE)
 
@@ -137,7 +137,7 @@ async def incoming_content_gan(message: types.message, state: FSMContext):
         await bot.send_message(message.chat.id, WORKING, reply_markup=kb)
         data = await state.get_data()
 
-        nst.run_gan(content.file_id, data['model'])
+        style_transfer.run_gan(content.file_id, data['model'])
         path = f'bot/result/res.jpg'
 
         answer = InputFile(path_or_bytesio=path)
