@@ -79,8 +79,8 @@ async def incoming_style_nst(message: types.message, state: FSMContext):
         style = message.photo[-1]
         content = data_dict['content']
 
-        style_name = f'images/{style.file_id}.jpg'
-        content_name = f'images/{content.file_id}.jpg'
+        style_name = f'{os.getcwd()}/images/{style.file_id}.jpg'
+        content_name = f'{os.getcwd()}/images/{content.file_id}.jpg'
 
         await style.download(style_name)
         await content.download(content_name)
@@ -131,14 +131,14 @@ async def incoming_content_gan(message: types.message, state: FSMContext):
     if len(message.photo) > 0:
 
         content = message.photo[-1]
-        content_name = f'./images/{content.file_id}.jpg'
+        content_name = f'{os.getcwd()}/images/{content.file_id}.jpg'
 
         await content.download(content_name)
         await bot.send_message(message.chat.id, WORKING, reply_markup=kb)
         data = await state.get_data()
 
         nst.run_gan(content.file_id, data['model'])
-        path = '../GAN/res_gan/res.jpg'
+        path = f'{os.getcwd()}/result/res.jpg'
 
         answer = InputFile(path_or_bytesio=path)
         await bot.send_photo(message.chat.id, answer, DONE)
