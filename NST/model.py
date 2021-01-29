@@ -1,7 +1,5 @@
-import torchvision.transforms as transforms
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 from torch.autograd import Variable
 
 class GramMatrix(nn.Module):

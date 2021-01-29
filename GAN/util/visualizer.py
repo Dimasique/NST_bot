@@ -33,10 +33,9 @@ def save_images(visuals, image_path, aspect_ratio=1.0, width=256):
       if label == 'real':
         continue
       im = util.tensor2im(im_data)
-      image_name = 'res.jpg'
+      image_name = './result/res.jpg'
       save_path = os.path.join(image_dir, image_name)
       util.save_image(im, save_path, aspect_ratio=aspect_ratio)
-      return save_path
 
 
 class Visualizer():

@@ -1,13 +1,8 @@
 from PIL import Image
-import torch.nn.functional as F
-import torch.optim as optim
-import torchvision.transforms as transforms
 import numpy as np
 import torch
-from model import Net
+from NST.model import Net
 import os
-import subprocess
-
 
 IMAGE_SIZE = 256
 
@@ -29,7 +24,7 @@ def preprocess_batch(batch):
     return batch
 
 
-def run(style_path, content_path):
+def run_nst(style_path, content_path):
     content = load(content_path).requires_grad_(False)
     style = load(style_path).requires_grad_(False)
 
@@ -54,10 +49,9 @@ def save(img):
     img = img.clone().clamp(0, 255).detach().numpy()
     img = img.transpose(1, 2, 0).astype('uint8')
     img = Image.fromarray(img)
-    img.save('res.jpg')
-
+    img.save('result/res.jpg')
 
 
 def run_gan(img, model):
-    os.system(f'python ./GAN/test.py --dataroot ./GAN/img --name {model}_pretrained --model test --no_dropout')
+    os.system(f'python ./GAN/test.py --dataroot ./images/ --name {model}_pretrained --model test --no_dropout')
     os.remove(f'./GAN/img/{img}.jpg')

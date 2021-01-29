@@ -2,24 +2,20 @@ import asyncio
 import logging
 import os
 
-from aiogram import Bot, types, executor, types
+from aiogram import Bot, types
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from aiogram.dispatcher import Dispatcher, FSMContext
-from aiogram.dispatcher.webhook import SendMessage
 from aiogram.utils.executor import start_webhook
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.types import InputFile
 
 from aiogram.types.message import ContentType
 
-from aiogram.types import ReplyKeyboardRemove, \
-    ReplyKeyboardMarkup, KeyboardButton, \
-    InlineKeyboardMarkup, InlineKeyboardButton
-
 from urllib.parse import urljoin
 
-from answers import *
-from states import *
+from utils.answers import *
+from utils.states import *
+from utils.keyboards import *
 
 import nst
 
@@ -39,25 +35,6 @@ bot = Bot(token=BOT_TOKEN, loop=loop)
 
 dp = Dispatcher(bot, storage=MemoryStorage())
 dp.middleware.setup(LoggingMiddleware())
-
-button_nst = KeyboardButton('/nst')
-button_gan = KeyboardButton('/gan')
-button_help = KeyboardButton('/help')
-button_cancel = KeyboardButton('/cancel')
-
-kb = ReplyKeyboardMarkup()
-
-kb.add(button_nst)
-kb.add(button_gan)
-kb.add(button_help)
-kb.add(button_cancel)
-
-gan_kb = InlineKeyboardMarkup(row_width=2)
-btn_vangogh = InlineKeyboardButton('ван Гог', callback_data='vangogh')
-btn_monet = InlineKeyboardButton('Монэ', callback_data='monet')
-
-gan_kb.add(btn_vangogh)
-gan_kb.add(btn_monet)
 
 
 @dp.message_handler(commands=['start'], state="*")
@@ -102,16 +79,16 @@ async def incoming_style_nst(message: types.message, state: FSMContext):
         style = message.photo[-1]
         content = data_dict['content']
 
-        style_name = f'{style.file_id}.jpg'
-        content_name = f'{content.file_id}.jpg'
+        style_name = f'images/{style.file_id}.jpg'
+        content_name = f'images/{content.file_id}.jpg'
 
         await style.download(style_name)
         await content.download(content_name)
 
         await bot.send_message(message.chat.id, WORKING, reply_markup=kb)
 
-        nst.run(style_name, content_name)
-        answer = InputFile(path_or_bytesio='res.jpg')
+        nst.run_nst(style_name, content_name)
+        answer = InputFile(path_or_bytesio='result/res.jpg')
         await bot.send_photo(message.chat.id, answer, DONE)
 
         await state.finish()
@@ -122,16 +99,19 @@ async def incoming_style_nst(message: types.message, state: FSMContext):
         await bot.send_message(message.chat.id, GETTING_IMAGE_ERROR, reply_markup=kb)
 
 
-#############################################################################
+# _______________________________________________________________________#
 
-@dp.message_handler(commands=['gan'], state='*')
-async def wrong_message(message: types.message):
+
+# __________________________GAN_________________________________________#
+
+@dp.message_handler(commands=['gan'], state="*")
+async def choose_gan(message: types.message):
     await GAN_States.waiting_for_painter.set()
     await bot.send_message(message.chat.id, GAN_CHOOSE, reply_markup=gan_kb)
 
 
 @dp.callback_query_handler(lambda c: c.data == 'vangogh', state=GAN_States.waiting_for_painter)
-async def process_callback_button1(callback_query: types.CallbackQuery, state: FSMContext):
+async def process_callback_vangogh(callback_query: types.CallbackQuery, state: FSMContext):
     await bot.answer_callback_query(callback_query.id)
     await GAN_States.waiting_for_content.set()
     await bot.send_message(callback_query.from_user.id, WAITING_FOR_IMAGE)
@@ -139,7 +119,7 @@ async def process_callback_button1(callback_query: types.CallbackQuery, state: F
 
 
 @dp.callback_query_handler(lambda c: c.data == 'monet', state=GAN_States.waiting_for_painter)
-async def process_callback_button2(callback_query: types.CallbackQuery, state: FSMContext):
+async def process_callback_monet(callback_query: types.CallbackQuery, state: FSMContext):
     await bot.answer_callback_query(callback_query.id)
     await GAN_States.waiting_for_content.set()
     await bot.send_message(callback_query.from_user.id, WAITING_FOR_IMAGE)
@@ -151,14 +131,14 @@ async def incoming_content_gan(message: types.message, state: FSMContext):
     if len(message.photo) > 0:
 
         content = message.photo[-1]
-        content_name = f'./GAN/img/{content.file_id}.jpg'
+        content_name = f'./images/{content.file_id}.jpg'
 
         await content.download(content_name)
         await bot.send_message(message.chat.id, WORKING, reply_markup=kb)
         data = await state.get_data()
 
         nst.run_gan(content.file_id, data['model'])
-        path = './GAN/res_gan/res.jpg'
+        path = '../GAN/res_gan/res.jpg'
 
         answer = InputFile(path_or_bytesio=path)
         await bot.send_photo(message.chat.id, answer, DONE)
@@ -168,7 +148,7 @@ async def incoming_content_gan(message: types.message, state: FSMContext):
         await bot.send_message(message.chat.id, GETTING_IMAGE_ERROR, reply_markup=kb)
 
 
-###########################################################################################
+# _______________________________________________________________________#
 
 
 @dp.message_handler(state="*", content_types=ContentType.ANY)
