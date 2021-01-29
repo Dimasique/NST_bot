@@ -54,4 +54,4 @@ def save(img):
 
 def run_gan(img, model):
     os.system(f'python ./GAN/test.py --dataroot ./images/ --name {model}_pretrained --model test --no_dropout')
-    os.remove(f'./GAN/img/{img}.jpg')
+    os.remove(f'bot/images/{img}.jpg')
