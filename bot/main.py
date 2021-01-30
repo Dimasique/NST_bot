@@ -91,7 +91,7 @@ async def incoming_style_nst(message: types.message, state: FSMContext):
         await style.download(style_name)
         await content.download(content_name)
 
-        message.answer(WORKING)
+        await message.answer(WORKING)
         # await bot.send_message(message.chat.id, WORKING, reply_markup=kb)
         style_transfer.run_nst(style_name, content_name)
         answer = InputFile(path_or_bytesio='bot/result/res.jpg')

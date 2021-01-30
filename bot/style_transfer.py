@@ -3,6 +3,7 @@ import numpy as np
 import torch
 from NST.model import Net
 import os
+import gc
 
 IMAGE_SIZE = 256
 
@@ -41,6 +42,8 @@ def run_nst(style_path, content_path):
     output = style_model(content_image)
     save(output[0])
 
+    gc.collect()
+    del style_model
     os.remove(style_path)
     os.remove(content_path)
 
