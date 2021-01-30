@@ -39,18 +39,21 @@ dp.middleware.setup(LoggingMiddleware())
 
 @dp.message_handler(commands=['start'], state="*")
 async def hello(message: types.Message):
-    await bot.send_message(message.chat.id, HELLO, reply_markup=kb)
+    await message.reply(HELLO, reply_markup=kb)
+    # await bot.send_message(message.chat.id, HELLO, reply_markup=kb)
 
 
 @dp.message_handler(commands=['help'], state="*")
 async def help(message: types.Message):
-    await bot.send_message(message.chat.id, HELP, reply_markup=kb)
+    await message.reply(HELP)
+    # await bot.send_message(message.chat.id, HELP, reply_markup=kb)
 
 
 @dp.message_handler(commands=['cancel'], state="*")
 async def cancel(message: types.Message, state: FSMContext):
     await state.finish()
-    await bot.send_message(message.chat.id, CANCEL, reply_markup=kb)
+    await message.reply(CANCEL, reply_markup=kb)
+    # await bot.send_message(message.chat.id, CANCEL, reply_markup=kb)
 
 
 # __________________________NST_________________________________________#
@@ -58,7 +61,8 @@ async def cancel(message: types.Message, state: FSMContext):
 @dp.message_handler(commands=['nst'], state="*")
 async def choose_nst(message: types.Message):
     await NST_States.waiting_for_content.set()
-    await bot.send_message(message.chat.id, NST_CHOOSE, reply_markup=kb)
+    await message.reply(NST_CHOOSE)
+    # await bot.send_message(message.chat.id, NST_CHOOSE, reply_markup=kb)
 
 
 @dp.message_handler(state=NST_States.waiting_for_content, content_types=ContentType.ANY)
@@ -66,9 +70,11 @@ async def incoming_content_nst(message: types.message, state: FSMContext):
     if len(message.photo) > 0:
         await state.update_data(content=message.photo[-1])
         await NST_States.waiting_for_style.set()
-        await bot.send_message(message.chat.id, WAIT_FOR_STYLE, reply_markup=kb)
+        await message.reply(WAIT_FOR_STYLE)
+        # await bot.send_message(message.chat.id, WAIT_FOR_STYLE, reply_markup=kb)
     else:
-        await bot.send_message(message.chat.id, GETTING_IMAGE_ERROR, reply_markup=kb)
+        await message.reply(GETTING_IMAGE_ERROR)
+        # await bot.send_message(message.chat.id, GETTING_IMAGE_ERROR, reply_markup=kb)
 
 
 @dp.message_handler(state=NST_States.waiting_for_style, content_types=ContentType.ANY)
@@ -85,18 +91,17 @@ async def incoming_style_nst(message: types.message, state: FSMContext):
         await style.download(style_name)
         await content.download(content_name)
 
-        await bot.send_message(message.chat.id, WORKING, reply_markup=kb)
-
+        message.reply(WORKING)
+        # await bot.send_message(message.chat.id, WORKING, reply_markup=kb)
         style_transfer.run_nst(style_name, content_name)
         answer = InputFile(path_or_bytesio='bot/result/res.jpg')
         await bot.send_photo(message.chat.id, answer, DONE)
 
         await state.finish()
-        os.remove(style_name)
-        os.remove(content_name)
 
     else:
-        await bot.send_message(message.chat.id, GETTING_IMAGE_ERROR, reply_markup=kb)
+        await message.reply(GETTING_IMAGE_ERROR)
+        # await bot.send_message(message.chat.id, GETTING_IMAGE_ERROR, reply_markup=kb)
 
 
 # _______________________________________________________________________#
@@ -107,8 +112,8 @@ async def incoming_style_nst(message: types.message, state: FSMContext):
 @dp.message_handler(commands=['gan'], state="*")
 async def choose_gan(message: types.message):
     await GAN_States.waiting_for_painter.set()
-    await bot.send_message(message.chat.id, GAN_CHOOSE, reply_markup=gan_kb)
-
+    message.reply(GAN_CHOOSE)
+    # await bot.send_message(message.chat.id, GAN_CHOOSE, reply_markup=gan_kb)
 
 @dp.callback_query_handler(lambda c: c.data == 'vangogh', state=GAN_States.waiting_for_painter)
 async def process_callback_vangogh(callback_query: types.CallbackQuery, state: FSMContext):
@@ -134,7 +139,9 @@ async def incoming_content_gan(message: types.message, state: FSMContext):
         content_name = f'bot/images/{content.file_id}.jpg'
 
         await content.download(content_name)
-        await bot.send_message(message.chat.id, WORKING, reply_markup=kb)
+
+        await message.reply(WORKING)
+        # await bot.send_message(message.chat.id, WORKING, reply_markup=kb)
         data = await state.get_data()
 
         style_transfer.run_gan(content.file_id, data['model'])
@@ -153,7 +160,8 @@ async def incoming_content_gan(message: types.message, state: FSMContext):
 
 @dp.message_handler(state="*", content_types=ContentType.ANY)
 async def wrong_message(message: types.message):
-    await bot.send_message(message.chat.id, WRONG_COMMAND, reply_markup=kb)
+    await message.reply(WRONG_COMMAND, reply_markup=kb)
+    # await bot.send_message(message.chat.id, WRONG_COMMAND, reply_markup=kb)
 
 
 async def on_startup(dp):

@@ -41,6 +41,9 @@ def run_nst(style_path, content_path):
     output = style_model(content_image)
     save(output[0])
 
+    os.remove(style_path)
+    os.remove(content_path)
+
 
 def save(img):
     (b, g, r) = torch.chunk(img, 3)
