@@ -112,7 +112,7 @@ async def incoming_style_nst(message: types.message, state: FSMContext):
 @dp.message_handler(commands=['gan'], state="*")
 async def choose_gan(message: types.message):
     await GAN_States.waiting_for_painter.set()
-    message.answer(GAN_CHOOSE)
+    await message.answer(GAN_CHOOSE)
     # await bot.send_message(message.chat.id, GAN_CHOOSE, reply_markup=gan_kb)
 
 @dp.callback_query_handler(lambda c: c.data == 'vangogh', state=GAN_States.waiting_for_painter)
