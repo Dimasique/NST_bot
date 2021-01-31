@@ -73,8 +73,8 @@ async def incoming_content_nst(message: types.message, state: FSMContext):
         await NST_States.waiting_for_style.set()
         await message.answer(WAIT_FOR_STYLE)
 
-        proc = Process(target=nst_process, args=(message, state))
-        proc.start()
+        #proc = Process(target=nst_process, args=(message, state))
+        #proc.start()
         # await bot.send_message(message.chat.id, WAIT_FOR_STYLE, reply_markup=kb)
     else:
         await message.answer(GETTING_IMAGE_ERROR)
@@ -149,7 +149,7 @@ async def on_shutdown(dp):
     pass
 
 
-def nst_process(message, state):
+async def nst_process(message, state):
     data_dict = await state.get_data()
     style = message.photo[-1]
     content = data_dict['content']
@@ -167,7 +167,7 @@ def nst_process(message, state):
     await state.finish()
 
 
-def gan_process(message, state):
+async def gan_process(message, state):
     content = message.photo[-1]
     content_name = f'bot/images/{content.file_id}.jpg'
 
