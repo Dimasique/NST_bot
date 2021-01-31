@@ -2,7 +2,9 @@ import torch
 import torch.nn as nn
 from torch.autograd import Variable
 
+
 class GramMatrix(nn.Module):
+
     def forward(self, y):
         (b, ch, h, w) = y.size()
         features = y.view(b, ch, w * h)

@@ -16,6 +16,7 @@ from urllib.parse import urljoin
 from utils.answers import *
 from utils.states import *
 from utils.keyboards import *
+from multiprocessing import Process
 
 import style_transfer
 
@@ -38,7 +39,7 @@ dp.middleware.setup(LoggingMiddleware())
 
 
 @dp.message_handler(commands=['start'], state="*")
-async def hello(message: types.Message):
+async def start(message: types.Message):
     await message.answer(HELLO, reply_markup=kb)
     # await bot.send_message(message.chat.id, HELLO, reply_markup=kb)
 
@@ -71,6 +72,9 @@ async def incoming_content_nst(message: types.message, state: FSMContext):
         await state.update_data(content=message.photo[-1])
         await NST_States.waiting_for_style.set()
         await message.answer(WAIT_FOR_STYLE)
+
+        proc = Process(target=nst_process, args=(message, state))
+        proc.start()
         # await bot.send_message(message.chat.id, WAIT_FOR_STYLE, reply_markup=kb)
     else:
         await message.answer(GETTING_IMAGE_ERROR)
@@ -80,24 +84,7 @@ async def incoming_content_nst(message: types.message, state: FSMContext):
 @dp.message_handler(state=NST_States.waiting_for_style, content_types=ContentType.ANY)
 async def incoming_style_nst(message: types.message, state: FSMContext):
     if len(message.photo) > 0:
-
-        data_dict = await state.get_data()
-        style = message.photo[-1]
-        content = data_dict['content']
-
-        style_name = f'bot/images/{style.file_id}.jpg'
-        content_name = f'bot/images/{content.file_id}.jpg'
-
-        await style.download(style_name)
-        await content.download(content_name)
-
         await message.answer(WORKING)
-        # await bot.send_message(message.chat.id, WORKING, reply_markup=kb)
-        style_transfer.run_nst(style_name, content_name)
-        answer = InputFile(path_or_bytesio='bot/result/res.jpg')
-        await bot.send_photo(message.chat.id, answer, DONE)
-
-        await state.finish()
 
     else:
         await message.answer(GETTING_IMAGE_ERROR)
@@ -114,6 +101,7 @@ async def choose_gan(message: types.message):
     await GAN_States.waiting_for_painter.set()
     await message.answer(GAN_CHOOSE, reply_markup=gan_kb)
     # await bot.send_message(message.chat.id, GAN_CHOOSE, reply_markup=gan_kb)
+
 
 @dp.callback_query_handler(lambda c: c.data == 'vangogh', state=GAN_States.waiting_for_painter)
 async def process_callback_vangogh(callback_query: types.CallbackQuery, state: FSMContext):
@@ -134,22 +122,10 @@ async def process_callback_monet(callback_query: types.CallbackQuery, state: FSM
 @dp.message_handler(state=GAN_States.waiting_for_content, content_types=ContentType.ANY)
 async def incoming_content_gan(message: types.message, state: FSMContext):
     if len(message.photo) > 0:
-
-        content = message.photo[-1]
-        content_name = f'bot/images/{content.file_id}.jpg'
-
-        await content.download(content_name)
-
         await message.answer(WORKING)
-        # await bot.send_message(message.chat.id, WORKING, reply_markup=kb)
-        data = await state.get_data()
+        proc = Process(target=gan_process, args=(message, state))
+        proc.start()
 
-        style_transfer.run_gan(content.file_id, data['model'])
-        path = f'bot/result/res.jpg'
-
-        answer = InputFile(path_or_bytesio=path)
-        await bot.send_photo(message.chat.id, answer, DONE)
-        await state.finish()
 
     else:
         await bot.send_message(message.chat.id, GETTING_IMAGE_ERROR, reply_markup=kb)
@@ -172,6 +148,40 @@ async def on_startup(dp):
 async def on_shutdown(dp):
     pass
 
+
+def nst_process(message, state):
+    data_dict = await state.get_data()
+    style = message.photo[-1]
+    content = data_dict['content']
+
+    style_name = f'bot/images/{style.file_id}.jpg'
+    content_name = f'bot/images/{content.file_id}.jpg'
+
+    await style.download(style_name)
+    await content.download(content_name)
+
+    # await bot.send_message(message.chat.id, WORKING, reply_markup=kb)
+    style_transfer.run_nst(style_name, content_name)
+    answer = InputFile(path_or_bytesio='bot/result/res.jpg')
+    await bot.send_photo(message.chat.id, answer, DONE)
+    await state.finish()
+
+
+def gan_process(message, state):
+    content = message.photo[-1]
+    content_name = f'bot/images/{content.file_id}.jpg'
+
+    await content.download(content_name)
+
+    # await bot.send_message(message.chat.id, WORKING, reply_markup=kb)
+    data = await state.get_data()
+
+    style_transfer.run_gan(content.file_id, data['model'])
+    path = f'bot/result/res.jpg'
+
+    answer = InputFile(path_or_bytesio=path)
+    await bot.send_photo(message.chat.id, answer, DONE)
+    await state.finish()
 
 if __name__ == '__main__':
     start_webhook(dispatcher=dp, webhook_path=WEBHOOK_PATH, on_startup=on_startup, on_shutdown=on_shutdown,
