@@ -44,8 +44,8 @@ def run_nst(style_path, content_path):
 
     gc.collect()
     del style_model
-    os.remove(style_path)
-    os.remove(content_path)
+    #os.remove(style_path)
+    #os.remove(content_path)
 
 
 def save(img):
