@@ -1,4 +1,4 @@
-#Style transfer telegram bot
+# Style transfer telegram bot
 
 
 Бот является итоговым проектом Deep learning school (осень, 2020)
