@@ -38,7 +38,7 @@ def run_nst(style_path, content_path):
     style_model.eval()
 
     content_image = preprocess_batch(content)
-    style_model.setTarget(style)
+    style_model.set_style(style)
     output = style_model(content_image)
     save(output[0])
 
@@ -60,4 +60,4 @@ def save(img):
 
 def run_gan(img, model):
     os.system(f'python ./GAN/test.py --dataroot ./bot/images/ --name {model}_pretrained --model test --no_dropout')
-    os.remove(f'bot/images/{img}.jpg')
+    #os.remove(f'bot/images/{img}.jpg')

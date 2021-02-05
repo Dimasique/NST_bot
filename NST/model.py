@@ -1,84 +1,67 @@
 import torch
 import torch.nn as nn
-from torch.autograd import Variable
 
 
-class GramMatrix(nn.Module):
+def gram(x):
+    b, ch, h, w = x.shape
+    x = x.view(b, ch, w * h)
+    x_t = x.transpose(1, 2)
 
-    def forward(self, y):
-        (b, ch, h, w) = y.size()
-        features = y.view(b, ch, w * h)
-        features_t = features.transpose(1, 2)
-        gram = features.bmm(features_t) / (ch * h * w)
-        return gram
+    return x.bmm(x_t) / (ch * h * w)
 
 
-class ConvLayer(torch.nn.Module):
+class ConvLayer(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride):
         super(ConvLayer, self).__init__()
-        reflection_padding = kernel_size // 2
-        self.reflection_pad = nn.ReflectionPad2d(reflection_padding)
-        self.conv2d = nn.Conv2d(in_channels, out_channels, kernel_size, stride)
+        padding = kernel_size // 2
+        self.reflection_pad_2d = nn.ReflectionPad2d(padding)
+        self.conv = nn.Conv2d(in_channels, out_channels, kernel_size, stride)
 
     def forward(self, x):
-        out = self.reflection_pad(x)
-        out = self.conv2d(out)
+        out = self.reflection_pad_2d(x)
+        out = self.conv(out)
         return out
 
 
 class Bottleneck(nn.Module):
-    """ Pre-activation residual block
-    Identity Mapping in Deep Residual Networks
-    ref https://arxiv.org/abs/1603.05027
-    """
 
-    def __init__(self, inplanes, planes, stride=1, downsample=None, norm_layer=nn.BatchNorm2d):
+    def __init__(self, inplanes, planes, stride, downsample=False):
         super(Bottleneck, self).__init__()
         self.expansion = 4
         self.downsample = downsample
-        if self.downsample is not None:
+        if self.downsample:
             self.residual_layer = nn.Conv2d(inplanes, planes * self.expansion,
                                             kernel_size=1, stride=stride)
-        conv_block = []
-        conv_block += [norm_layer(inplanes),
-                       nn.ReLU(inplace=True),
-                       nn.Conv2d(inplanes, planes, kernel_size=1, stride=1)]
-        conv_block += [norm_layer(planes),
-                       nn.ReLU(inplace=True),
-                       ConvLayer(planes, planes, kernel_size=3, stride=stride)]
-        conv_block += [norm_layer(planes),
-                       nn.ReLU(inplace=True),
-                       nn.Conv2d(planes, planes * self.expansion, kernel_size=1, stride=1)]
-        self.conv_block = nn.Sequential(*conv_block)
+        self.conv = nn.Sequential(
+            nn.BatchNorm2d(inplanes),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(inplanes, planes, kernel_size=1, stride=1),
+            nn.BatchNorm2d(planes),
+            nn.ReLU(inplace=True),
+            ConvLayer(planes, planes, kernel_size=3, stride=stride),
+            nn.BatchNorm2d(planes),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(planes, planes * self.expansion, kernel_size=1, stride=1)
+        )
 
     def forward(self, x):
-        if self.downsample is not None:
-            residual = self.residual_layer(x)
-        else:
-            residual = x
-        return residual + self.conv_block(x)
+        residual = self.residual_layer(x) if self.downsample else x
+        return residual + self.conv(x)
 
 
-class UpsampleConvLayer(torch.nn.Module):
-    """UpsampleConvLayer
-    Upsamples the input and then does a convolution. This method gives better results
-    compared to ConvTranspose2d.
-    ref: http://distill.pub/2016/deconv-checkerboard/
-    """
+class UpConvLayer(torch.nn.Module):
 
-    def __init__(self, in_channels, out_channels, kernel_size, stride, upsample=None):
-        super(UpsampleConvLayer, self).__init__()
-        self.upsample = upsample
-        if upsample:
-            self.upsample_layer = torch.nn.Upsample(scale_factor=upsample)
+    def __init__(self, in_channels, out_channels, kernel_size, stride, sc_factor):
+        super(UpConvLayer, self).__init__()
+        self.upsample_layer = nn.Upsample(scale_factor=sc_factor)
+
         self.reflection_padding = kernel_size // 2
         if self.reflection_padding != 0:
             self.reflection_pad = nn.ReflectionPad2d(self.reflection_padding)
         self.conv2d = nn.Conv2d(in_channels, out_channels, kernel_size, stride)
 
     def forward(self, x):
-        if self.upsample:
-            x = self.upsample_layer(x)
+        x = self.upsample_layer(x)
         if self.reflection_padding != 0:
             x = self.reflection_pad(x)
         out = self.conv2d(x)
@@ -86,104 +69,83 @@ class UpsampleConvLayer(torch.nn.Module):
 
 
 class UpBottleneck(nn.Module):
-    """ Up-sample residual block (from MSG-Net paper)
-    Enables passing identity all the way through the generator
-    ref https://arxiv.org/abs/1703.06953
-    """
 
-    def __init__(self, inplanes, planes, stride=2, norm_layer=nn.BatchNorm2d):
+    def __init__(self, inplanes, planes, stride=2):
         super(UpBottleneck, self).__init__()
-        self.expansion = 4
-        self.residual_layer = UpsampleConvLayer(inplanes, planes * self.expansion,
-                                                kernel_size=1, stride=1, upsample=stride)
-        conv_block = []
-        conv_block += [norm_layer(inplanes),
-                       nn.ReLU(inplace=True),
-                       nn.Conv2d(inplanes, planes, kernel_size=1, stride=1)]
-        conv_block += [norm_layer(planes),
-                       nn.ReLU(inplace=True),
-                       UpsampleConvLayer(planes, planes, kernel_size=3, stride=1, upsample=stride)]
-        conv_block += [norm_layer(planes),
-                       nn.ReLU(inplace=True),
-                       nn.Conv2d(planes, planes * self.expansion, kernel_size=1, stride=1)]
-        self.conv_block = nn.Sequential(*conv_block)
+        self.residual_layer = UpConvLayer(inplanes, planes * 4,
+                                          kernel_size=1, stride=1, sc_factor=stride)
+        self.conv = nn.Sequential(
+            nn.BatchNorm2d(inplanes),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(inplanes, planes, kernel_size=1, stride=1),
+            nn.BatchNorm2d(planes),
+            nn.ReLU(inplace=True),
+            UpConvLayer(planes, planes, kernel_size=3, stride=1, sc_factor=stride),
+            nn.BatchNorm2d(planes),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(planes, planes * 4, kernel_size=1, stride=1)
+        )
 
     def forward(self, x):
-        return self.residual_layer(x) + self.conv_block(x)
+        return self.residual_layer(x) + self.conv(x)
 
 
 class Inspiration(nn.Module):
-    """ Inspiration Layer (from MSG-Net paper)
-    tuning the featuremap with target Gram Matrix
-    ref https://arxiv.org/abs/1703.06953
-    """
 
     def __init__(self, C, B=1):
         super(Inspiration, self).__init__()
-        # B is equal to 1 or input mini_batch
+
         self.weight = nn.Parameter(torch.Tensor(1, C, C), requires_grad=False)
-        # non-parameter buffer
-        self.G = Variable(torch.Tensor(B, C, C), requires_grad=False)
+        self.G = torch.Tensor(B, C, C)
         self.C = C
         self.reset_parameters()
 
     def reset_parameters(self):
         self.weight.data.uniform_(0.0, 0.02)
 
-    def setTarget(self, target):
+    def set_style(self, target):
         self.G = target
 
     def forward(self, X):
-        # input X is a 3D feature map
         self.P = torch.bmm(self.weight.expand_as(self.G), self.G)
         return torch.bmm(self.P.transpose(1, 2).expand(X.size(0), self.C, self.C),
                          X.view(X.size(0), X.size(1), -1)).view_as(X)
 
-    def __repr__(self):
-        return self.__class__.__name__ + '(' \
-               + 'N x ' + str(self.C) + ')'
-
 
 class Net(nn.Module):
-    def __init__(self, input_nc=3, output_nc=3, ngf=128, norm_layer=nn.InstanceNorm2d, n_blocks=6, gpu_ids=None):
+    def __init__(self, input_nc=3, output_nc=3, ngf=128, n_blocks=6):
         super(Net, self).__init__()
-        if gpu_ids is None:
-            gpu_ids = []
-        self.gpu_ids = gpu_ids
-        self.gram = GramMatrix()
 
-        block = Bottleneck
-        upblock = UpBottleneck
         expansion = 4
-
-        model1 = []
-        model1 += [ConvLayer(input_nc, 64, kernel_size=7, stride=1),
-                   norm_layer(64),
-                   nn.ReLU(inplace=True),
-                   block(64, 32, 2, 1, norm_layer),
-                   block(32 * expansion, ngf, 2, 1, norm_layer)]
-        self.model1 = nn.Sequential(*model1)
-
-        model = []
+        self.model1 = nn.Sequential(
+            ConvLayer(input_nc, 64, kernel_size=7, stride=1),
+            nn.BatchNorm2d(64),
+            nn.ReLU(inplace=True),
+            Bottleneck(64, 32, 2, True),
+            Bottleneck(32 * expansion, ngf, 2, True)
+        )
         self.ins = Inspiration(ngf * expansion)
-        model += [self.model1]
-        model += [self.ins]
+
+        self.model = nn.Sequential(
+            self.model1,
+            self.ins
+        )
 
         for i in range(n_blocks):
-            model += [block(ngf * expansion, ngf, 1, None, norm_layer)]
+            self.model.add_module(f'bk{i + 1}', Bottleneck(ngf * expansion, ngf, 1, False))
 
-        model += [upblock(ngf * expansion, 32, 2, norm_layer),
-                  upblock(32 * expansion, 16, 2, norm_layer),
-                  norm_layer(16 * expansion),
-                  nn.ReLU(inplace=True),
-                  ConvLayer(16 * expansion, output_nc, kernel_size=7, stride=1)]
+        self.model.add_module('ubk1', UpBottleneck(ngf * expansion, 32, 2))
+        self.model.add_module('ubk2', UpBottleneck(32 * expansion, 16, 2))
+        self.model.add_module('bn2', nn.BatchNorm2d(16 * expansion))
+        self.model.add_module('relu2', nn.ReLU(inplace=True))
+        self.model.add_module('conv2', ConvLayer(16 * expansion, output_nc, kernel_size=7, stride=1))
 
-        self.model = nn.Sequential(*model)
 
-    def setTarget(self, Xs1):
+
+    def set_style(self, Xs1):
         F1 = self.model1(Xs1)
-        G = self.gram(F1)
-        self.ins.setTarget(G)
+        G = gram(F1)
+        self.ins.set_style(G)
 
     def forward(self, input):
         return self.model(input)
