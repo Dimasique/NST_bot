@@ -100,8 +100,6 @@ class Model1_output(nn.Module):
         self.G = torch.Tensor(1, C, C)
         self.C = C
 
-        self.weight.data.uniform_(0.0, 0.02)
-
     def forward(self, X):
         self.P = torch.bmm(self.weight.expand_as(self.G), self.G)
         return torch.bmm(self.P.transpose(1, 2).expand(X.size(0), self.C, self.C),
@@ -139,8 +137,8 @@ class Net(nn.Module):
         self.model.add_module('11', nn.ReLU(inplace=True))
         self.model.add_module('12', ConvLayer(16 * expansion, out_channels, kernel_size=7, stride=1))
 
-    def set_gram(self, Xs):
-        feature_map = self.model1(Xs)
+    def set_gram(self, style):
+        feature_map = self.model1(style)
         gram_m = gram(feature_map)
         self.m1_out.set_gram(gram_m)
 
