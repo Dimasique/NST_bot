@@ -76,11 +76,11 @@ class ConvLayer(torch.nn.Module):
 
 class UpsampleConvLayer(torch.nn.Module):
 
-    def __init__(self, in_channels, out_channels, kernel_size, stride, upsample=None):
+    def __init__(self, in_channels, out_channels, kernel_size, stride, upsample):
         super(UpsampleConvLayer, self).__init__()
         self.upsample = upsample
-        if upsample:
-            self.upsample_layer = torch.nn.Upsample(scale_factor=upsample)
+
+        self.upsample_layer = torch.nn.Upsample(scale_factor=upsample)
         self.reflection_padding = kernel_size // 2
         if self.reflection_padding != 0:
             self.reflection_pad = nn.ReflectionPad2d(self.reflection_padding)
@@ -126,8 +126,8 @@ class Net(nn.Module):
             ConvLayer(input_nc, 64, kernel_size=7, stride=1),
             norm_layer(64),
             nn.ReLU(inplace=True),
-            Bottleneck(64, 32, 2, 1, norm_layer),
-            Bottleneck(32 * expansion, ngf, 2, 1, norm_layer)
+            Bottleneck(64, 32, 2, True, norm_layer),
+            Bottleneck(32 * expansion, ngf, 2, True, norm_layer)
         )
         self.ins = Inspiration(ngf * expansion)
 

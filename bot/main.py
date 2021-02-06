@@ -2,6 +2,10 @@ import asyncio
 import logging
 import os
 
+from queue import Queue
+from threading import Thread
+import time
+
 from aiogram import Bot, types
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from aiogram.dispatcher import Dispatcher, FSMContext
@@ -35,6 +39,8 @@ bot = Bot(token=BOT_TOKEN, loop=loop)
 
 dp = Dispatcher(bot, storage=MemoryStorage())
 dp.middleware.setup(LoggingMiddleware())
+
+task_queue = Queue()
 
 
 @dp.message_handler(commands=['start'], state="*")
@@ -82,9 +88,9 @@ async def incoming_content_nst(message: types.message, state: FSMContext):
 async def incoming_style_nst(message: types.message, state: FSMContext):
     if len(message.photo) > 0:
         await message.answer(WORKING)
-        data_dict = await state.get_data()
+        data = await state.get_data()
         style = message.photo[-1]
-        content = data_dict['content']
+        content = data['content']
 
         style_name = f'bot/images/{style.file_id}.jpg'
         content_name = f'bot/images/{content.file_id}.jpg'
@@ -92,9 +98,12 @@ async def incoming_style_nst(message: types.message, state: FSMContext):
         await style.download(style_name)
         await content.download(content_name)
 
-        style_transfer.run_nst(style_name, content_name)
-        answer = InputFile(path_or_bytesio='bot/result/res.jpg')
-        await bot.send_photo(message.chat.id, answer, DONE)
+        task = {'id': message.chat.id, 'type': 'nst', 'content': content.file_id, 'style' : style.file_id}
+        task_queue.put(task)
+
+        #style_transfer.run_nst(style_name, content_name)
+        #answer = InputFile(path_or_bytesio='bot/result/res.jpg')
+        #await bot.send_photo(message.chat.id, answer, DONE)
 
         await state.finish()
 
@@ -136,11 +145,14 @@ async def incoming_content_gan(message: types.message, state: FSMContext):
 
         data = await state.get_data()
 
-        style_transfer.run_gan(content.file_id, data['model'])
-        path = f'bot/result/res.jpg'
+        task = {'id': message.chat.id, 'type': 'gan', 'content': content.file_id, 'model': data['model']}
+        task_queue.put(task)
 
-        answer = InputFile(path_or_bytesio=path)
-        await bot.send_photo(message.chat.id, answer, DONE)
+        # style_transfer.run_gan(content.file_id, data['model'])
+        # path = f'bot/result/res.jpg'
+
+        # answer = InputFile(path_or_bytesio=path)
+        # await bot.send_photo(message.chat.id, answer, DONE)
         await state.finish()
 
     else:
@@ -164,6 +176,36 @@ async def on_shutdown(dp):
     pass
 
 
+async def process_task(task):
+    if task['type'] == 'nst':
+        style_transfer.run_nst(task['style'], task['content'])
+
+    else:
+        style_transfer.run_gan(task['content'], task['model'])
+
+    answer = InputFile(path_or_bytesio='bot/result/res.jpg')
+    await bot.send_photo(task['id'], answer, DONE)
+
+
+def process_queue(task_queue):
+    while True:
+        if not task_queue.empty():
+            task = task_queue.get()
+
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+
+            loop.run_until_complete(process_task(task))
+            loop.close()
+
+            task_queue.task_done()
+
+        time.sleep(2)
+
+
 if __name__ == '__main__':
+    worker = Thread(target=process_queue, args=(task_queue,))
+    worker.start()
+
     start_webhook(dispatcher=dp, webhook_path=WEBHOOK_PATH, on_startup=on_startup, on_shutdown=on_shutdown,
                   skip_updates=False, host=WEBAPP_HOST, port=WEBAPP_PORT)
