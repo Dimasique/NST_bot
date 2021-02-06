@@ -128,7 +128,7 @@ class Net(nn.Module):
 
         self.model = nn.Sequential(
             self.model1,
-            self.ins
+            self.m1_out
         )
         for i in range(n_blocks):
             self.model.add_module(f'{i + 2}', Bottleneck(128 * expansion, 128, 1, False, norm_layer))
