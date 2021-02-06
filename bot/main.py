@@ -176,7 +176,7 @@ async def on_shutdown(dp):
     pass
 
 
-async def process_task(task):
+async def process_task(task, bot):
     if task['type'] == 'nst':
         style_transfer.run_nst(task['style'], task['content'])
 
@@ -187,7 +187,7 @@ async def process_task(task):
     await bot.send_photo(task['id'], answer, DONE)
 
 
-def process_queue(task_queue):
+def process_queue(task_queue, bot):
     while True:
         if not task_queue.empty():
             task = task_queue.get()
@@ -195,7 +195,7 @@ def process_queue(task_queue):
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
 
-            loop.run_until_complete(process_task(task))
+            loop.run_until_complete(process_task(task, bot))
             loop.close()
 
             task_queue.task_done()
@@ -204,7 +204,7 @@ def process_queue(task_queue):
 
 
 if __name__ == '__main__':
-    worker = Thread(target=process_queue, args=(task_queue,))
+    worker = Thread(target=process_queue, args=(task_queue, bot,))
     worker.start()
 
     start_webhook(dispatcher=dp, webhook_path=WEBHOOK_PATH, on_startup=on_startup, on_shutdown=on_shutdown,
