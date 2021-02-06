@@ -99,7 +99,7 @@ async def incoming_style_nst(message: types.message, state: FSMContext):
         await style.download(style_name)
         await content.download(content_name)
 
-        task = {'id': message.chat.id, 'type': 'nst', 'content': content.file_id, 'style' : style.file_id}
+        task = {'id': message.chat.id, 'type': 'nst', 'content': content_name, 'style': style_name}
         task_queue.put(task)
 
         #style_transfer.run_nst(style_name, content_name)
