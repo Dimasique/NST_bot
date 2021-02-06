@@ -41,6 +41,7 @@ dp = Dispatcher(bot, storage=MemoryStorage())
 dp.middleware.setup(LoggingMiddleware())
 
 task_queue = Queue()
+result_queue = Queue()
 
 
 @dp.message_handler(commands=['start'], state="*")
@@ -176,35 +177,31 @@ async def on_shutdown(dp):
     pass
 
 
-async def process_task(task, bot):
-    if task['type'] == 'nst':
-        style_transfer.run_nst(task['style'], task['content'])
-
-    else:
-        style_transfer.run_gan(task['content'], task['model'])
-
-    answer = InputFile(path_or_bytesio='bot/result/res.jpg')
-    await bot.send_photo(task['id'], answer, DONE)
+def send_result(id):
+    photo_res = InputFile(path_or_bytesio='bot/result/res.jpg')
+    bot.send_photo(id, photo_res, DONE)
 
 
-def process_queue(task_queue, bot):
+def process_queue(task_queue):
     while True:
         if not task_queue.empty():
             task = task_queue.get()
 
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
+            if task['type'] == 'nst':
+                style_transfer.run_nst(task['style'], task['content'])
 
-            loop.run_until_complete(process_task(task, bot))
-            loop.close()
+            else:
+                style_transfer.run_gan(task['content'], task['model'])
 
+            send_fut = asyncio.run_coroutine_threadsafe(send_result(task['id']), loop)
+            send_fut.result()
             task_queue.task_done()
 
         time.sleep(2)
 
 
 if __name__ == '__main__':
-    worker = Thread(target=process_queue, args=(task_queue, bot,))
+    worker = Thread(target=process_queue, args=(task_queue, result_queue,))
     worker.start()
 
     start_webhook(dispatcher=dp, webhook_path=WEBHOOK_PATH, on_startup=on_startup, on_shutdown=on_shutdown,
