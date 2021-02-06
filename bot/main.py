@@ -89,7 +89,7 @@ async def incoming_content_nst(message: types.message, state: FSMContext):
         await message.answer(WORKING)
         data = await state.get_data()
         content = message.photo[-1]
-        style = data['content']
+        style = data['style']
 
         style_name = f'bot/images/{style.file_id}.jpg'
         content_name = f'bot/images/{content.file_id}.jpg'
