@@ -54,7 +54,7 @@ async def help(message: types.Message):
 
 @dp.message_handler(commands=['nst'], state="*")
 async def choose_nst(message: types.Message):
-    await NST_States.waiting_for_content.set()
+    await NST_States.waiting_for_style.set()
     await message.answer(CHOOSE_NST)
 
 
@@ -73,23 +73,23 @@ async def cancel(message: types.Message, state: FSMContext):
 # __________________________NST_________________________________________#
 
 
-@dp.message_handler(state=NST_States.waiting_for_content, content_types=ContentType.ANY)
-async def incoming_content_nst(message: types.message, state: FSMContext):
+@dp.message_handler(state=NST_States.waiting_for_style, content_types=ContentType.ANY)
+async def incoming_style_nst(message: types.message, state: FSMContext):
     if len(message.photo) > 0:
-        await state.update_data(content=message.photo[-1])
-        await NST_States.waiting_for_style.set()
-        await message.answer(WAITING_FOR_IMAGE_STYLE)
+        await state.update_data(style=message.photo[-1])
+        await NST_States.waiting_for_content.set()
+        await message.answer(WAITING_FOR_IMAGE_CONTENT)
     else:
         await message.answer(GETTING_IMAGE_CONTENT_ERROR)
 
 
-@dp.message_handler(state=NST_States.waiting_for_style, content_types=ContentType.ANY)
-async def incoming_style_nst(message: types.message, state: FSMContext):
+@dp.message_handler(state=NST_States.waiting_for_content, content_types=ContentType.ANY)
+async def incoming_content_nst(message: types.message, state: FSMContext):
     if len(message.photo) > 0:
         await message.answer(WORKING)
         data = await state.get_data()
-        style = message.photo[-1]
-        content = data['content']
+        content = message.photo[-1]
+        style = data['content']
 
         style_name = f'bot/images/{style.file_id}.jpg'
         content_name = f'bot/images/{content.file_id}.jpg'

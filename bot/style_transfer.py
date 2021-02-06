@@ -38,14 +38,14 @@ def run_nst(style_path, content_path):
     style_model.eval()
 
     content_image = preprocess_batch(content)
-    style_model.set_style(style)
+    style_model.set_gram(style)
     output = style_model(content_image)
     save(output[0])
 
     gc.collect()
     del style_model
-    os.remove(style_path)
-    os.remove(content_path)
+    #os.remove(style_path)
+    #os.remove(content_path)
 
 
 def save(img):
