@@ -177,9 +177,9 @@ async def on_shutdown(dp):
     pass
 
 
-def send_result(id):
+async def send_result(id):
     photo_res = InputFile(path_or_bytesio='bot/result/res.jpg')
-    bot.send_photo(id, photo_res, DONE)
+    await bot.send_photo(id, photo_res, DONE)
 
 
 def process_queue(task_queue):
