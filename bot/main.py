@@ -159,7 +159,7 @@ async def wrong_message(message: types.message):
 
 async def on_startup(dp):
     await bot.delete_webhook()
-    await bot.set_webhook(WEBHOOK_URL)
+    await bot.set_webhook(WEBHOOK_URL, drop_pending_updates=True)
 
 
 async def on_shutdown(dp):
